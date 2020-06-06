@@ -9,7 +9,7 @@ object SessionToSessionDtoMapper : Mapper<Session, SessionDto> {
 
     override fun get(from: Session): SessionDto =
         SessionDto(
-            movieDto = MovieToMovieDtoMapper[from.movie],
+            movie = MovieToMovieDtoMapper[from.movie],
             numberOfTickets = from.numberOfTickets,
             remainingTickets = from.remainingTickets,
             beginDate = LocalDateTimeToStringMapper[from.beginDate],
