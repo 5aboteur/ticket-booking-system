@@ -1,10 +1,18 @@
 package com.github.saboteur.ticketbookingsystem.ticketbookingservice.service
 
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.SessionDto
+import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.UserDto
 
 interface TicketBookingService {
 
     fun getAllSessions(pageIndex: Int, pageSize: Int): List<SessionDto>
     fun getActiveSessions(pageIndex: Int, pageSize: Int): List<SessionDto>
+
+    fun getAllUsers(pageIndex: Int, pageSize: Int): List<UserDto>
+
+    fun createUser(userDto: UserDto): Long
+    fun getUser(userId: Long): UserDto?
+    fun updateUser(userId: Long, userDto: UserDto): Boolean?
+    fun deleteUser(userId: Long): Boolean?
 
 }

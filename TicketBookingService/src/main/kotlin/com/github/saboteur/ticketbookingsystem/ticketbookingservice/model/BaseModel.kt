@@ -12,7 +12,7 @@ open class BaseModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    val id: Long = 0
+    var id: Long = 0
 
     companion object {
         val empty = BaseModel()
