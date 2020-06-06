@@ -1,0 +1,24 @@
+server:
+  port: ${SERVER_PORT:8841}
+
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: update
+  flyway:
+    enabled: false
+    baseline-on-migrate: true
+    placeholders:
+      schema: ${app.postgres.schema}
+
+app:
+  service-name: ${SERVICE_NAME:ticket-booking-service}
+  postgres:
+    driver-class-name: ${POSTGRES_DRIVER:org.postgresql.Driver}
+    jdbc-url: ${POSTGRES_URL:jdbc:postgresql://localhost:5432/tbs}
+    username: ${POSTGRES_USER:tbs}
+    password: ${POSTGRES_PASSWORD:tbs}
+    schema: ${POSTGRES_DB:public}
+    connection-timeout: 20000
+    connection-init-sql: ALTER ROLE ${POSTGRES_USER:tbs} SET search_path TO ${POSTGRES_DB:public}
+    connection-test-query: SELECT 1
