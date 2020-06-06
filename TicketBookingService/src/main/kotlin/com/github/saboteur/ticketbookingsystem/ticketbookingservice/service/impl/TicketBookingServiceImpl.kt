@@ -4,6 +4,7 @@ import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.SessionD
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.UserDto
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.mapper.dto.SessionToSessionDtoMapper
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.mapper.dto.UserToUserDtoMapper
+import com.github.saboteur.ticketbookingsystem.ticketbookingservice.mapper.model.SessionDtoToSessionMapper
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.mapper.model.UserDtoToUserMapper
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.repository.SessionRepository
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.repository.UserRepository
@@ -106,6 +107,69 @@ class TicketBookingServiceImpl(
             ?: (null).also {
                 logger.error {
                     "Error deleting user: a user with ID = $userId doesn't exist in the database"
+                }
+            }
+
+    override fun createSession(sessionDto: SessionDto): Long {
+        var result = -1L
+
+        try {
+            result = sessionRepository
+                .save(SessionDtoToSessionMapper[sessionDto])
+                .id
+            logger.info { "Session with ID = $result created" }
+        } catch (e: DateTimeParseException) {
+            logger.error { "Error creating session: invalid date - ${e.localizedMessage}" }
+        } catch (e: IllegalArgumentException) {
+            logger.error { "Error creating session: ${e.localizedMessage}" }
+        }
+
+        return result
+    }
+
+    override fun getSession(sessionId: Long): SessionDto? =
+        sessionRepository
+            .findByIdOrNull(sessionId)
+            ?.let { session ->
+                SessionToSessionDtoMapper[session]
+            }
+
+    override fun updateSession(sessionId: Long, sessionDto: SessionDto): Boolean? =
+        sessionRepository
+            .findByIdOrNull(sessionId)
+            ?.let { session ->
+                val updatedSession = SessionDtoToSessionMapper[sessionDto]
+                updatedSession.id = session.id
+                val updatedId = sessionRepository
+                    .save(updatedSession)
+                    .id
+                if (updatedId == sessionId) {
+                    logger.info { "Session with ID = $sessionId updated" }
+                    true
+                } else {
+                    logger.error {
+                        "Error updating session: updated ID ($updatedId) != provided ID ($sessionId)"
+                    }
+                    false
+                }
+            }
+            ?: (null).also {
+                logger.error {
+                    "Error updating session: a session with ID = $sessionId doesn't exist in the database"
+                }
+            }
+
+    override fun deleteSession(sessionId: Long): Boolean? =
+        sessionRepository
+            .findByIdOrNull(sessionId)
+            ?.let {
+                sessionRepository.deleteById(sessionId)
+                logger.info { "Session with ID = $sessionId deleted" }
+                true
+            }
+            ?: (null).also {
+                logger.error {
+                    "Error deleting session: a session with ID = $sessionId doesn't exist in the database"
                 }
             }
 

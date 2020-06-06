@@ -15,4 +15,9 @@ interface TicketBookingService {
     fun updateUser(userId: Long, userDto: UserDto): Boolean?
     fun deleteUser(userId: Long): Boolean?
 
+    fun createSession(sessionDto: SessionDto): Long
+    fun getSession(sessionId: Long): SessionDto?
+    fun updateSession(sessionId: Long, sessionDto: SessionDto): Boolean?
+    fun deleteSession(sessionId: Long): Boolean?
+
 }

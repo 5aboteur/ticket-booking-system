@@ -103,6 +103,44 @@ interface TicketBookingControllerApi {
         userId: Long
     ): ResponseEntity<Boolean>
 
+    // Session API
+
+    @ApiOperation(value = "Create a new session")
+    @PostMapping(value = ["/$API_VERSION/administrator/session"])
+    fun createSession(
+        @ApiParam(value = "Session data")
+        @RequestBody(required = true)
+        sessionDto: SessionDto
+    ): ResponseEntity<Long>
+
+    @ApiOperation(value = "Get a session by ID")
+    @GetMapping(value = ["/$API_VERSION/administrator/session/{sessionId}"])
+    fun getSession(
+        @ApiParam(value = "Session ID", required = true, defaultValue = "666", example = "666")
+        @PathVariable(value = "sessionId")
+        sessionId: Long
+    ): ResponseEntity<SessionDto?>
+
+    @ApiOperation(value = "Update an existing session")
+    @PutMapping(value = ["/$API_VERSION/administrator/session/{sessionId}"])
+    fun updateSession(
+        @ApiParam(value = "Session ID", required = true, defaultValue = "666", example = "666")
+        @PathVariable(value = "sessionId")
+        sessionId: Long,
+
+        @ApiParam(value = "Session data")
+        @RequestBody(required = true)
+        sessionDto: SessionDto
+    ): ResponseEntity<Boolean>
+
+    @ApiOperation(value = "Delete an existing session")
+    @DeleteMapping(value = ["/$API_VERSION/administrator/session/{sessionId}"])
+    fun deleteSession(
+        @ApiParam(value = "Session ID", required = true, defaultValue = "666", example = "666")
+        @PathVariable(value = "sessionId")
+        sessionId: Long
+    ): ResponseEntity<Boolean>
+
     companion object {
         const val API_VERSION = "v1"
     }

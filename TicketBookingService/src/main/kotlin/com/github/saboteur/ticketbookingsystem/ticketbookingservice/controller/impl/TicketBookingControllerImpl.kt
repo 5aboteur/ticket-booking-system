@@ -100,4 +100,53 @@ class TicketBookingControllerImpl(
             .body(result)
     }
 
+    override fun createSession(sessionDto: SessionDto): ResponseEntity<Long> {
+        val result = ticketBookingService.createSession(sessionDto)
+        return ResponseEntity
+            .status(
+                if (result == -1L || result == 0L)
+                    HttpStatus.BAD_REQUEST
+                else
+                    HttpStatus.CREATED
+            )
+            .body(result)
+    }
+
+    override fun getSession(sessionId: Long): ResponseEntity<SessionDto?> {
+        val result = ticketBookingService.getSession(sessionId)
+        return ResponseEntity
+            .status(
+                if (result == null)
+                    HttpStatus.NOT_FOUND
+                else
+                    HttpStatus.OK
+            )
+            .body(result)
+    }
+
+    override fun updateSession(sessionId: Long, sessionDto: SessionDto): ResponseEntity<Boolean> {
+        val result = ticketBookingService.updateSession(sessionId, sessionDto)
+        return ResponseEntity
+            .status(
+                when (result) {
+                    true -> HttpStatus.OK
+                    false -> HttpStatus.BAD_REQUEST
+                    null -> HttpStatus.NOT_FOUND
+                }
+            )
+            .body(result)
+    }
+
+    override fun deleteSession(sessionId: Long): ResponseEntity<Boolean> {
+        val result = ticketBookingService.deleteSession(sessionId)
+        return ResponseEntity
+            .status(
+                if (result == null)
+                    HttpStatus.NOT_FOUND
+                else
+                    HttpStatus.OK
+            )
+            .body(result)
+    }
+
 }
