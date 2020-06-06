@@ -9,8 +9,12 @@ object ClientProfileDtoToClientMapper : Mapper<ClientProfileDto, Client> {
 
     override fun get(from: ClientProfileDto): Client =
         Client(
-            category = Category.valueOf(from.category).ordinal,
-            sessions = from.sessions.map(SessionDtoToSessionMapper::get)
+            category = Category
+                .valueOf(from.category)
+                .ordinal,
+            tickets = from.tickets
+                ?.map(TicketDtoToTicketMapper::get)
+                ?: emptyList()
         )
 
 }

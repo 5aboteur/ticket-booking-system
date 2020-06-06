@@ -21,10 +21,10 @@ data class Session(
     val movie: Movie = Movie.empty,
 
     @Column(name = "number_of_tickets")
-    val numberOfTickets: Int = 0,
+    var numberOfTickets: Int = 0,
 
     @Column(name = "remaining_tickets")
-    val remainingTickets: Int = 0,
+    var remainingTickets: Int = 0,
 
     @Column(name = "begin_date")
     val beginDate: LocalDateTime = LocalDateTime.MIN,

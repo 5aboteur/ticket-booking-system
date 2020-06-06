@@ -14,13 +14,13 @@ data class Client(
     val category: Int = 0,
 
     @OneToMany(cascade = [CascadeType.ALL])
-    val sessions: List<Session> = emptyList()
+    val tickets: List<Ticket> = emptyList()
 
 ) : BaseModel() {
     companion object {
         val empty = Client(
             category = 0,
-            sessions = emptyList()
+            tickets = emptyList()
         )
     }
 }

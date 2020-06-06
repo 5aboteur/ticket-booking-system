@@ -1,7 +1,10 @@
 package com.github.saboteur.ticketbookingsystem.ticketbookingservice.controller.impl
 
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.controller.TicketBookingControllerApi
+import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.BookingResultDto
+import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.SeatDto
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.SessionDto
+import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.TicketDto
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.UserDto
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.service.TicketBookingService
 import io.swagger.annotations.Api
@@ -29,6 +32,40 @@ class TicketBookingControllerImpl(
 
     override fun getActiveSessions(pageIndex: Int, pageSize: Int): ResponseEntity<List<SessionDto>> {
         val result = ticketBookingService.getActiveSessions(pageIndex, pageSize)
+        return ResponseEntity
+            .status(
+                if (result.isEmpty())
+                    HttpStatus.NOT_FOUND
+                else
+                    HttpStatus.OK
+            )
+            .body(result)
+    }
+
+    override fun getSeats(sessionId: Long): ResponseEntity<List<SeatDto>> {
+        val result = ticketBookingService.getSeats(sessionId)
+        return ResponseEntity
+            .status(
+                if (result.isEmpty())
+                    HttpStatus.NOT_FOUND
+                else
+                    HttpStatus.OK
+            )
+            .body(result)
+    }
+
+    override fun bookTicket(clientId: Long, sessionId: Long, seatNumber: String): ResponseEntity<BookingResultDto> {
+        val result = ticketBookingService.bookTicket(clientId, sessionId, seatNumber)
+        return ResponseEntity.ok(result)
+    }
+
+    override fun cancelBooking(clientId: Long, sessionId: Long, seatNumber: String): ResponseEntity<BookingResultDto> {
+        val result = ticketBookingService.cancelBooking(clientId, sessionId, seatNumber)
+        return ResponseEntity.ok(result)
+    }
+
+    override fun getTickets(clientId: Long): ResponseEntity<List<TicketDto>> {
+        val result = ticketBookingService.getTickets(clientId)
         return ResponseEntity
             .status(
                 if (result.isEmpty())

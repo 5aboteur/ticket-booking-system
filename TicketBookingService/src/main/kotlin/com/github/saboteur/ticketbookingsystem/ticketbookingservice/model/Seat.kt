@@ -17,7 +17,7 @@ data class Seat(
     val number: String = "",
 
     @Column(name = "is_booked")
-    val isBooked: Boolean = false
+    var isBooked: Boolean = false
 
 ) : BaseModel() {
     companion object {

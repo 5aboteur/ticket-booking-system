@@ -12,7 +12,7 @@ object ClientToClientProfileDtoMapper : Mapper<Client, ClientProfileDto> {
             category = Category
                 .values()[from.category]
                 .categoryName,
-            sessions = from.sessions.map(SessionToSessionDtoMapper::get)
+            tickets = from.tickets.map(TicketToTicketDtoMapper::get)
         )
 
 }

@@ -9,14 +9,14 @@ data class ClientProfileDto(
     @ApiModelProperty(value = "category")
     val category: String,
 
-    @ApiModelProperty(value = "sessions")
-    val sessions: List<SessionDto>
+    @ApiModelProperty(value = "tickets")
+    val tickets: List<TicketDto>?
 
 ) {
     companion object {
         val empty = ClientProfileDto(
             category = "",
-            sessions = emptyList()
+            tickets = null
         )
     }
 }

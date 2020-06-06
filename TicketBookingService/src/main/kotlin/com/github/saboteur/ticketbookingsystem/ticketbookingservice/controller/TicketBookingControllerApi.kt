@@ -1,6 +1,9 @@
 package com.github.saboteur.ticketbookingsystem.ticketbookingservice.controller
 
+import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.BookingResultDto
+import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.SeatDto
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.SessionDto
+import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.TicketDto
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.UserDto
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
@@ -48,6 +51,58 @@ interface TicketBookingControllerApi {
         @RequestParam(value = "pageSize")
         pageSize: Int
     ): ResponseEntity<List<SessionDto>>
+
+    // Session API
+
+    @ApiOperation(value = "Get seats information")
+    @GetMapping(value = ["/$API_VERSION/client/session/{sessionId}/seats"])
+    fun getSeats(
+        @ApiParam(value = "Session ID", required = true, defaultValue = "666", example = "666")
+        @PathVariable(value = "sessionId")
+        sessionId: Long
+    ): ResponseEntity<List<SeatDto>>
+
+    @ApiOperation(value = "Book a ticket")
+    @PostMapping(value = ["/$API_VERSION/client/{clientId}/session/{sessionId}/book"])
+    fun bookTicket(
+        @ApiParam(value = "Client ID", required = true, defaultValue = "666", example = "666")
+        @PathVariable(value = "clientId")
+        clientId: Long,
+
+        @ApiParam(value = "Session ID", required = true, defaultValue = "666", example = "666")
+        @PathVariable(value = "sessionId")
+        sessionId: Long,
+
+        @ApiParam(value = "Seat number", example = "1F")
+        @RequestParam(value = "seatNumber")
+        seatNumber: String
+    ): ResponseEntity<BookingResultDto>
+
+    @ApiOperation(value = "Cancel booking")
+    @DeleteMapping(value = ["/$API_VERSION/client/{clientId}/session/{sessionId}/book"])
+    fun cancelBooking(
+        @ApiParam(value = "Client ID", required = true, defaultValue = "666", example = "666")
+        @PathVariable(value = "clientId")
+        clientId: Long,
+
+        @ApiParam(value = "Session ID", required = true, defaultValue = "666", example = "666")
+        @PathVariable(value = "sessionId")
+        sessionId: Long,
+
+        @ApiParam(value = "Seat number", example = "1F")
+        @RequestParam(value = "seatNumber")
+        seatNumber: String
+    ): ResponseEntity<BookingResultDto>
+
+    // Client API
+
+    @ApiOperation(value = "Get client tickets")
+    @GetMapping(value = ["/$API_VERSION/client/{clientId}/tickets"])
+    fun getTickets(
+        @ApiParam(value = "Client ID", required = true, defaultValue = "666", example = "666")
+        @PathVariable(value = "clientId")
+        clientId: Long
+    ): ResponseEntity<List<TicketDto>>
 
     /* * * Administrator APIs * * */
 
