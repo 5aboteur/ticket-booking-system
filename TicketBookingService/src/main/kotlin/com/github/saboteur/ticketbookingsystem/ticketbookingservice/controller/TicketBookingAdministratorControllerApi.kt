@@ -1,6 +1,8 @@
 package com.github.saboteur.ticketbookingsystem.ticketbookingservice.controller
 
-import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.SessionDto
+import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.RescheduleSessionDto
+import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.SessionInDto
+import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.SessionOutDto
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.UserInDto
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.UserOutDto
 import io.swagger.annotations.Api
@@ -99,7 +101,7 @@ interface TicketBookingAdministratorControllerApi {
     fun createSession(
         @ApiParam(value = "Session data")
         @RequestBody(required = true)
-        sessionDto: SessionDto
+        sessionInDto: SessionInDto
     ): ResponseEntity<Long>
 
     @ApiOperation(value = "Get a session by ID")
@@ -108,18 +110,18 @@ interface TicketBookingAdministratorControllerApi {
         @ApiParam(value = "Session ID", required = true, defaultValue = "666", example = "666")
         @PathVariable(value = "sessionId")
         sessionId: Long
-    ): ResponseEntity<SessionDto?>
+    ): ResponseEntity<SessionOutDto?>
 
-    @ApiOperation(value = "Update an existing session")
+    @ApiOperation(value = "Reschedule an existing session")
     @PutMapping(value = ["/$API_VERSION/administrator/session/{sessionId}"])
-    fun updateSession(
+    fun rescheduleSession(
         @ApiParam(value = "Session ID", required = true, defaultValue = "666", example = "666")
         @PathVariable(value = "sessionId")
         sessionId: Long,
 
-        @ApiParam(value = "Session data")
+        @ApiParam(value = "Session schedule data")
         @RequestBody(required = true)
-        sessionDto: SessionDto
+        rescheduleSessionDto: RescheduleSessionDto
     ): ResponseEntity<Boolean>
 
     @ApiOperation(value = "Delete an existing session")

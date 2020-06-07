@@ -16,10 +16,10 @@ data class Session(
     val movie: Movie = Movie.empty,
 
     @Column(name = "begin_date")
-    val beginDate: LocalDateTime = LocalDateTime.MIN,
+    var beginDate: LocalDateTime = LocalDateTime.MIN,
 
     @Column(name = "end_date")
-    val endDate: LocalDateTime = LocalDateTime.MAX,
+    var endDate: LocalDateTime = LocalDateTime.MAX,
 
     @OneToMany(cascade = [CascadeType.ALL])
     val tickets: List<Ticket> = emptyList()

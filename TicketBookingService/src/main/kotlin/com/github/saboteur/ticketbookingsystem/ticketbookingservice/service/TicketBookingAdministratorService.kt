@@ -1,6 +1,8 @@
 package com.github.saboteur.ticketbookingsystem.ticketbookingservice.service
 
-import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.SessionDto
+import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.RescheduleSessionDto
+import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.SessionInDto
+import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.SessionOutDto
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.UserInDto
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.UserOutDto
 
@@ -16,9 +18,9 @@ interface TicketBookingAdministratorService {
     fun giveAdminRights(userId: Long): Boolean?
     fun removeAdminRights(userId: Long): Boolean?
 
-    fun createSession(sessionDto: SessionDto): Long
-    fun getSession(sessionId: Long): SessionDto?
-    fun updateSession(sessionId: Long, sessionDto: SessionDto): Boolean?
+    fun createSession(sessionInDto: SessionInDto): Long
+    fun getSession(sessionId: Long): SessionOutDto?
+    fun rescheduleSession(sessionId: Long, rescheduleSessionDto: RescheduleSessionDto): Boolean?
     fun deleteSession(sessionId: Long): Boolean?
 
 }

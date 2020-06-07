@@ -3,7 +3,7 @@ package com.github.saboteur.ticketbookingsystem.ticketbookingservice.controller.
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.controller.TicketBookingClientControllerApi
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.BookingResultDto
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.SeatDto
-import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.SessionDto
+import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.SessionOutDto
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.TicketDto
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.service.TicketBookingClientService
 import io.swagger.annotations.Api
@@ -17,7 +17,7 @@ class TicketBookingClientControllerImpl(
     private val ticketBookingClientService: TicketBookingClientService
 ) : TicketBookingClientControllerApi {
 
-    override fun getAllSessions(pageIndex: Int, pageSize: Int): ResponseEntity<List<SessionDto>> {
+    override fun getAllSessions(pageIndex: Int, pageSize: Int): ResponseEntity<List<SessionOutDto>> {
         val result = ticketBookingClientService.getAllSessions(pageIndex, pageSize)
         return ResponseEntity
             .status(
@@ -29,7 +29,7 @@ class TicketBookingClientControllerImpl(
             .body(result)
     }
 
-    override fun getActiveSessions(pageIndex: Int, pageSize: Int): ResponseEntity<List<SessionDto>> {
+    override fun getActiveSessions(pageIndex: Int, pageSize: Int): ResponseEntity<List<SessionOutDto>> {
         val result = ticketBookingClientService.getActiveSessions(pageIndex, pageSize)
         return ResponseEntity
             .status(

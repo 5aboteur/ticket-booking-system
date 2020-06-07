@@ -4,7 +4,7 @@ import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 
 @ApiModel(value = "Session")
-data class SessionDto(
+data class SessionOutDto(
 
     @ApiModelProperty(value = "movie")
     val movie: MovieDto,
@@ -26,7 +26,7 @@ data class SessionDto(
 
 ) {
     companion object {
-        val empty = SessionDto(
+        val empty = SessionOutDto(
             movie = MovieDto.empty,
             numberOfTickets = 0,
             remainingTickets = 0,

@@ -1,7 +1,9 @@
 package com.github.saboteur.ticketbookingsystem.ticketbookingservice.controller.impl
 
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.controller.TicketBookingAdministratorControllerApi
-import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.SessionDto
+import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.RescheduleSessionDto
+import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.SessionInDto
+import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.SessionOutDto
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.UserInDto
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.UserOutDto
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.service.TicketBookingAdministratorService
@@ -102,8 +104,8 @@ class TicketBookingAdministratorControllerImpl(
             .body(result)
     }
 
-    override fun createSession(sessionDto: SessionDto): ResponseEntity<Long> {
-        val result = ticketBookingAdministratorService.createSession(sessionDto)
+    override fun createSession(sessionInDto: SessionInDto): ResponseEntity<Long> {
+        val result = ticketBookingAdministratorService.createSession(sessionInDto)
         return ResponseEntity
             .status(
                 if (result == -1L || result == 0L)
@@ -114,7 +116,7 @@ class TicketBookingAdministratorControllerImpl(
             .body(result)
     }
 
-    override fun getSession(sessionId: Long): ResponseEntity<SessionDto?> {
+    override fun getSession(sessionId: Long): ResponseEntity<SessionOutDto?> {
         val result = ticketBookingAdministratorService.getSession(sessionId)
         return ResponseEntity
             .status(
@@ -126,8 +128,11 @@ class TicketBookingAdministratorControllerImpl(
             .body(result)
     }
 
-    override fun updateSession(sessionId: Long, sessionDto: SessionDto): ResponseEntity<Boolean> {
-        val result = ticketBookingAdministratorService.updateSession(sessionId, sessionDto)
+    override fun rescheduleSession(
+        sessionId: Long,
+        rescheduleSessionDto: RescheduleSessionDto
+    ): ResponseEntity<Boolean> {
+        val result = ticketBookingAdministratorService.rescheduleSession(sessionId, rescheduleSessionDto)
         return ResponseEntity
             .status(
                 when (result) {

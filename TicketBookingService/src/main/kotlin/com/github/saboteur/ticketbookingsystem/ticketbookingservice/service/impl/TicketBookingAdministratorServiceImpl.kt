@@ -1,12 +1,15 @@
 package com.github.saboteur.ticketbookingsystem.ticketbookingservice.service.impl
 
-import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.SessionDto
+import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.RescheduleSessionDto
+import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.SessionInDto
+import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.SessionOutDto
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.UserInDto
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.UserOutDto
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.exception.UnknownCategoryException
-import com.github.saboteur.ticketbookingsystem.ticketbookingservice.mapper.dto.SessionToSessionDtoMapper
+import com.github.saboteur.ticketbookingsystem.ticketbookingservice.mapper.common.StringToLocalDateTimeMapper
+import com.github.saboteur.ticketbookingsystem.ticketbookingservice.mapper.dto.SessionToSessionOutDtoMapper
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.mapper.dto.UserToUserDtoMapper
-import com.github.saboteur.ticketbookingsystem.ticketbookingservice.mapper.model.SessionDtoToSessionMapper
+import com.github.saboteur.ticketbookingsystem.ticketbookingservice.mapper.model.SessionInDtoToSessionMapper
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.mapper.model.UserInDtoToUserMapper
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.model.Administrator
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.model.User
@@ -181,12 +184,12 @@ class TicketBookingAdministratorServiceImpl(
             }
 
     @Transactional
-    override fun createSession(sessionDto: SessionDto): Long {
+    override fun createSession(sessionInDto: SessionInDto): Long {
         var result = -1L
 
         try {
             result = sessionRepository
-                .save(SessionDtoToSessionMapper[sessionDto])
+                .save(SessionInDtoToSessionMapper[sessionInDto])
                 .id
             logger.info { "Session with ID = $result created" }
         } catch (e: DateTimeParseException) {
@@ -199,11 +202,11 @@ class TicketBookingAdministratorServiceImpl(
     }
 
     @Transactional
-    override fun getSession(sessionId: Long): SessionDto? =
+    override fun getSession(sessionId: Long): SessionOutDto? =
         sessionRepository
             .findByIdOrNull(sessionId)
             ?.let { session ->
-                SessionToSessionDtoMapper[session]
+                SessionToSessionOutDtoMapper[session]
             }
             ?: (null).also {
                 logger.error {
@@ -212,31 +215,43 @@ class TicketBookingAdministratorServiceImpl(
             }
 
     @Transactional
-    override fun updateSession(sessionId: Long, sessionDto: SessionDto): Boolean? =
+    override fun rescheduleSession(sessionId: Long, rescheduleSessionDto: RescheduleSessionDto): Boolean? =
         sessionRepository
             .findByIdOrNull(sessionId)
             ?.let { session ->
-                val updatedSession = SessionDtoToSessionMapper[sessionDto]
-
-                updatedSession.id = session.id
-
-                val updatedId = sessionRepository
-                    .save(updatedSession)
-                    .id
-
-                if (updatedId == sessionId) {
-                    logger.info { "Session with ID = $sessionId updated" }
-                    true
-                } else {
-                    logger.error {
-                        "Error updating session: updated ID ($updatedId) != provided ID ($sessionId)"
+                try {
+                    // Update current session dates
+                    val updatedSession = session.apply {
+                        beginDate = StringToLocalDateTimeMapper[rescheduleSessionDto.beginDate]
+                        endDate = StringToLocalDateTimeMapper[rescheduleSessionDto.endDate]
                     }
+
+                    updatedSession.id = session.id
+
+                    val updatedId = sessionRepository
+                        .save(updatedSession)
+                        .id
+
+                    if (updatedId == sessionId) {
+                        logger.info { "Session with ID = $sessionId updated" }
+                        true
+                    } else {
+                        logger.error {
+                            "Error rescheduling session: updated ID ($updatedId) != provided ID ($sessionId)"
+                        }
+                        false
+                    }
+                } catch (e: DateTimeParseException) {
+                    logger.error { "Error rescheduling session: invalid date - ${e.localizedMessage}" }
+                    false
+                } catch (e: IllegalArgumentException) {
+                    logger.error { "Error rescheduling session: ${e.localizedMessage}" }
                     false
                 }
             }
             ?: (null).also {
                 logger.error {
-                    "Error updating session: a session with ID = $sessionId doesn't exist in the database"
+                    "Error rescheduling session: a session with ID = $sessionId doesn't exist in the database"
                 }
             }
 

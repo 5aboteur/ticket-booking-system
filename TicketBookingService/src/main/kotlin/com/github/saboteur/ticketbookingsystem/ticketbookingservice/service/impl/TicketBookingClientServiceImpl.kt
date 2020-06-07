@@ -3,12 +3,13 @@ package com.github.saboteur.ticketbookingsystem.ticketbookingservice.service.imp
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.domain.BookingOperation
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.BookingResultDto
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.SeatDto
-import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.SessionDto
+import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.SessionOutDto
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.TicketDto
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.mapper.dto.BookingResultToBookingResultDtoMapper
-import com.github.saboteur.ticketbookingsystem.ticketbookingservice.mapper.dto.SessionToSessionDtoMapper
+import com.github.saboteur.ticketbookingsystem.ticketbookingservice.mapper.dto.SessionToSessionOutDtoMapper
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.mapper.dto.TicketToSeatDtoMapper
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.mapper.dto.TicketToTicketDtoMapper
+import com.github.saboteur.ticketbookingsystem.ticketbookingservice.model.Ticket
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.model.booking.BookedTicket
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.model.booking.BookingResult
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.repository.ClientRepository
@@ -27,17 +28,17 @@ class TicketBookingClientServiceImpl(
 ) : TicketBookingClientService {
 
     @Transactional
-    override fun getAllSessions(pageIndex: Int, pageSize: Int): List<SessionDto> =
+    override fun getAllSessions(pageIndex: Int, pageSize: Int): List<SessionOutDto> =
         sessionRepository
             .findAll(PageRequest.of(pageIndex, pageSize))
-            .map(SessionToSessionDtoMapper::get)
+            .map(SessionToSessionOutDtoMapper::get)
             .toList()
 
     @Transactional
-    override fun getActiveSessions(pageIndex: Int, pageSize: Int): List<SessionDto> =
+    override fun getActiveSessions(pageIndex: Int, pageSize: Int): List<SessionOutDto> =
         sessionRepository
             .findAllActive(PageRequest.of(pageIndex, pageSize))
-            .map(SessionToSessionDtoMapper::get)
+            .map(SessionToSessionOutDtoMapper::get)
             .toList()
 
     @Transactional
@@ -90,10 +91,23 @@ class TicketBookingClientServiceImpl(
         // Check if a ticket with the seat number we got already booked
         when (session.tickets[index].isBooked) {
             false -> {
+                // Mark a ticket as booked
                 session.tickets[index].isBooked = true
+
+                // Add a ticket to its client
+                try {
+                    addTicket(clientId, session.tickets[index])
+                } catch (e: NoSuchElementException) {
+                    logger.error {
+                        "Error booking ticket: a client with ID = $clientId doesn't exist in the database"
+                    }
+                    return BookingResultToBookingResultDtoMapper[bookingResult]
+                }
+
                 val updatedId = sessionRepository
                     .save(session)
                     .id
+
                 if (updatedId == sessionId) {
                     bookingResult
                         .apply { resultMsg = "succeed" }
@@ -155,22 +169,42 @@ class TicketBookingClientServiceImpl(
             }
         }
 
-        // Cancel the booking
-        session.tickets[index].isBooked = false
+        // Check if a ticket with the seat number we got already booked
+        when (session.tickets[index].isBooked) {
+            true -> {
+                // Unmark a ticket as booked
+                session.tickets[index].isBooked = false
 
-        val updatedId = sessionRepository
-            .save(session)
-            .id
-
-        if (updatedId == sessionId) {
-            bookingResult
-                .apply { resultMsg = "succeed" }
-                .also {
-                    logger.info { "Client = $clientId successfully cancel the booking" }
+                // Remove a ticket from its client
+                try {
+                    removeTicket(clientId, session.tickets[index])
+                } catch (e: NoSuchElementException) {
+                    logger.error {
+                        "Error booking cancellation: a client with ID = $clientId doesn't exist in the database"
+                    }
+                    return BookingResultToBookingResultDtoMapper[bookingResult]
                 }
-        } else {
-            logger.error {
-                "Error booking cancellation: updated ID ($updatedId) != retrieved ID ($sessionId)"
+
+                val updatedId = sessionRepository
+                    .save(session)
+                    .id
+
+                if (updatedId == sessionId) {
+                    bookingResult
+                        .apply { resultMsg = "succeed" }
+                        .also {
+                            logger.info { "Client = $clientId successfully cancel the booking" }
+                        }
+                } else {
+                    logger.error {
+                        "Error booking cancellation: updated ID ($updatedId) != retrieved ID ($sessionId)"
+                    }
+                }
+            }
+            false -> {
+                logger.error {
+                    "Error booking cancellation: a ticket with the seat number = $seatNumber is free"
+                }
             }
         }
 
@@ -184,6 +218,42 @@ class TicketBookingClientServiceImpl(
             ?.tickets
             ?.map(TicketToTicketDtoMapper::get)
             ?: emptyList()
+
+    private fun addTicket(clientId: Long, ticket: Ticket) {
+        val client = clientRepository
+            .findByIdOrNull(clientId)
+            ?: throw NoSuchElementException("no such client")
+
+        client.tickets.add(ticket)
+
+        val updatedId = clientRepository
+            .save(client)
+            .id
+
+        if (updatedId == clientId) {
+            logger.info { "A ticket successfully added to client = $clientId" }
+        } else {
+            logger.error { "Error adding ticket: updated ID ($updatedId) != provided ID ($clientId)" }
+        }
+    }
+
+    private fun removeTicket(clientId: Long, ticket: Ticket) {
+        val client = clientRepository
+            .findByIdOrNull(clientId)
+            ?: throw NoSuchElementException("no such client")
+
+        client.tickets.remove(ticket)
+
+        val updatedId = clientRepository
+            .save(client)
+            .id
+
+        if (updatedId == clientId) {
+            logger.info { "A ticket successfully removed from client = $clientId" }
+        } else {
+            logger.error { "Error removing ticket: updated ID ($updatedId) != provided ID ($clientId)" }
+        }
+    }
 
     companion object {
         private val logger = KotlinLogging.logger {}

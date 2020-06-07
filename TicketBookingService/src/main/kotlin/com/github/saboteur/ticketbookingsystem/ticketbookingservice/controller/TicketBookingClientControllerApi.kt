@@ -2,7 +2,7 @@ package com.github.saboteur.ticketbookingsystem.ticketbookingservice.controller
 
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.BookingResultDto
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.SeatDto
-import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.SessionDto
+import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.SessionOutDto
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.TicketDto
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
@@ -35,7 +35,7 @@ interface TicketBookingClientControllerApi {
         @ApiParam(value = "Page size", defaultValue = "10", example = "10")
         @RequestParam(value = "pageSize")
         pageSize: Int
-    ): ResponseEntity<List<SessionDto>>
+    ): ResponseEntity<List<SessionOutDto>>
 
     @ApiOperation(value = "Get active sessions in the system")
     @GetMapping(value = ["/$API_VERSION/client/sessions/active"])
@@ -47,7 +47,7 @@ interface TicketBookingClientControllerApi {
         @ApiParam(value = "Page size", defaultValue = "10", example = "10")
         @RequestParam(value = "pageSize")
         pageSize: Int
-    ): ResponseEntity<List<SessionDto>>
+    ): ResponseEntity<List<SessionOutDto>>
 
     // Session API
 
