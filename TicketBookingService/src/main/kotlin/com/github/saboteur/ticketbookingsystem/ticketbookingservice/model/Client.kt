@@ -11,7 +11,7 @@ import javax.persistence.Table
 data class Client(
 
     @Column(name = "category")
-    val category: Int = 0,
+    var category: Int = 0,
 
     @OneToMany(cascade = [CascadeType.ALL])
     val tickets: MutableList<Ticket> = mutableListOf()

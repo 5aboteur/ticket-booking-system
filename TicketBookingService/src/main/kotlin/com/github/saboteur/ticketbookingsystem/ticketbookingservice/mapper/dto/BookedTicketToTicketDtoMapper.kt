@@ -9,6 +9,8 @@ object BookedTicketToTicketDtoMapper : Mapper<BookedTicket, TicketDto> {
 
     override fun get(from: BookedTicket): TicketDto =
         TicketDto(
+            price = from.price ?: 0.0,
+            discountPrice = from.discountPrice ?: 0.0,
             movie = from.movie ?: "",
             date = from.date
                 ?.let { LocalDateTimeToStringMapper[it] }

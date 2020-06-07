@@ -5,7 +5,6 @@ import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.SessionI
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.SessionOutDto
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.UserInDto
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.UserOutDto
-import com.github.saboteur.ticketbookingsystem.ticketbookingservice.exception.UnknownCategoryException
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.mapper.common.StringToLocalDateTimeMapper
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.mapper.dto.SessionToSessionOutDtoMapper
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.mapper.dto.UserToUserDtoMapper
@@ -22,7 +21,6 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.format.DateTimeParseException
 
 @Service
 class TicketBookingAdministratorServiceImpl(
@@ -56,11 +54,7 @@ class TicketBookingAdministratorServiceImpl(
                 .save(UserInDtoToUserMapper[userInDto])
                 .id
             logger.info { "User with ID = $result created" }
-        } catch (e: UnknownCategoryException) {
-            logger.error { "Error creating user: invalid category - ${e.localizedMessage}" }
-        } catch (e: DateTimeParseException) {
-            logger.error { "Error creating user: invalid date - ${e.localizedMessage}" }
-        } catch (e: IllegalArgumentException) {
+        } catch (e: Exception) {
             logger.error { "Error creating user: ${e.localizedMessage}" }
         }
 
@@ -87,11 +81,12 @@ class TicketBookingAdministratorServiceImpl(
             ?.let { user ->
                 try {
                     val updatedUser = UserInDtoToUserMapper[userInDto]
+                    val updatedCategory = updatedUser.client?.category
 
                     with (updatedUser) {
                         id = user.id
                         admin = user.admin
-                        client = user.client
+                        client = user.client?.apply { category = updatedCategory ?: 0 }
                     }
 
                     val updatedId = userRepository
@@ -107,13 +102,7 @@ class TicketBookingAdministratorServiceImpl(
                         }
                         false
                     }
-                } catch (e: UnknownCategoryException) {
-                    logger.error { "Error creating user: invalid category - ${e.localizedMessage}" }
-                    false
-                } catch (e: DateTimeParseException) {
-                    logger.error { "Error creating user: invalid date - ${e.localizedMessage}" }
-                    false
-                } catch (e: IllegalArgumentException) {
+                } catch (e: Exception) {
                     logger.error { "Error creating user: ${e.localizedMessage}" }
                     false
                 }
@@ -192,9 +181,7 @@ class TicketBookingAdministratorServiceImpl(
                 .save(SessionInDtoToSessionMapper[sessionInDto])
                 .id
             logger.info { "Session with ID = $result created" }
-        } catch (e: DateTimeParseException) {
-            logger.error { "Error creating session: invalid date - ${e.localizedMessage}" }
-        } catch (e: IllegalArgumentException) {
+        } catch (e: Exception) {
             logger.error { "Error creating session: ${e.localizedMessage}" }
         }
 
@@ -241,10 +228,7 @@ class TicketBookingAdministratorServiceImpl(
                         }
                         false
                     }
-                } catch (e: DateTimeParseException) {
-                    logger.error { "Error rescheduling session: invalid date - ${e.localizedMessage}" }
-                    false
-                } catch (e: IllegalArgumentException) {
+                } catch (e: Exception) {
                     logger.error { "Error rescheduling session: ${e.localizedMessage}" }
                     false
                 }

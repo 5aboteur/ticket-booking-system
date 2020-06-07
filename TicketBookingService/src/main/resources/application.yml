@@ -13,6 +13,13 @@ spring:
 
 app:
   service-name: ${SERVICE_NAME:ticket-booking-service}
+  social-benefits: ${SOCIAL_BENEFITS_ENABLE:true}
+  occupancy-timeout: ${OCCUPANCY_TIMEOUT_SECONDS:10}
+  occupancy-min-rate: ${OCCUPANCY_MIN_RATE:2}
+  occupancy-max-rate: ${OCCUPANCY_MAX_RATE:5}
+  social-one-discount-percentage: ${SOCIAL_ONE_DISCOUNT_PERCENTAGE:1}
+  social-two-discount-percentage: ${SOCIAL_TWO_DISCOUNT_PERCENTAGE:2}
+  social-three-discount-percentage: ${SOCIAL_THREE_DISCOUNT_PERCENTAGE:3}
   postgres:
     driver-class-name: ${POSTGRES_DRIVER:org.postgresql.Driver}
     jdbc-url: ${POSTGRES_URL:jdbc:postgresql://localhost:5432/tbs}

@@ -8,5 +8,12 @@ import org.springframework.stereotype.Component
 @Component
 @ConfigurationProperties(prefix = "app")
 class AppProperties(
-    var serviceName: String = ""
+    var serviceName: String = "",
+    var socialBenefits: Boolean = true,
+    var occupancyTimeout: Int = 0,
+    var occupancyMinRate: Int = 0,
+    var occupancyMaxRate: Int = 0,
+    var socialOneDiscountPercentage: Int = 0,
+    var socialTwoDiscountPercentage: Int = 0,
+    var socialThreeDiscountPercentage: Int = 0
 )

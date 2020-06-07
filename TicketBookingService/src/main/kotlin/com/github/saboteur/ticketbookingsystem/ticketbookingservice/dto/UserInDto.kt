@@ -10,13 +10,17 @@ data class UserInDto(
     val login: String,
 
     @ApiModelProperty(value = "email")
-    val email: String
+    val email: String,
+
+    @ApiModelProperty(value = "category")
+    val category: String
 
 ) {
     companion object {
         val empty = UserInDto(
             login = "",
-            email = ""
+            email = "",
+            category = ""
         )
     }
 }

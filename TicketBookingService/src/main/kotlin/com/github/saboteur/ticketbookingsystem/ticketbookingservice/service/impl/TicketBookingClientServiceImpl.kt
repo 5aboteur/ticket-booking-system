@@ -1,6 +1,8 @@
 package com.github.saboteur.ticketbookingsystem.ticketbookingservice.service.impl
 
+import com.github.saboteur.ticketbookingsystem.ticketbookingservice.config.properties.AppProperties
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.domain.BookingOperation
+import com.github.saboteur.ticketbookingsystem.ticketbookingservice.domain.Category
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.BookingResultDto
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.SeatDto
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.SessionOutDto
@@ -23,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class TicketBookingClientServiceImpl(
+    private val appProperties: AppProperties,
     private val sessionRepository: SessionRepository,
     private val clientRepository: ClientRepository
 ) : TicketBookingClientService {
@@ -88,20 +91,28 @@ class TicketBookingClientServiceImpl(
             }
         }
 
+        // Get user's client profile
+        val client = clientRepository
+            .findByIdOrNull(clientId)
+            ?: return BookingResultToBookingResultDtoMapper[bookingResult].also {
+                logger.error {
+                    "Error booking ticket: a client with ID = $clientId doesn't exist in the database"
+                }
+            }
+
         // Check if a ticket with the seat number we got already booked
         when (session.tickets[index].isBooked) {
             false -> {
                 // Mark a ticket as booked
                 session.tickets[index].isBooked = true
 
+                // Calculate discount price
+                session.tickets[index].discountPrice =
+                    calcTicketDiscountPrice(session.tickets[index].price, client.category)
+
                 // Add a ticket to its client
-                try {
-                    addTicket(clientId, session.tickets[index])
-                } catch (e: NoSuchElementException) {
-                    logger.error {
-                        "Error booking ticket: a client with ID = $clientId doesn't exist in the database"
-                    }
-                    return BookingResultToBookingResultDtoMapper[bookingResult]
+                client.tickets.add(session.tickets[index]).also {
+                    clientRepository.save(client)
                 }
 
                 val updatedId = sessionRepository
@@ -110,7 +121,11 @@ class TicketBookingClientServiceImpl(
 
                 if (updatedId == sessionId) {
                     bookingResult
-                        .apply { resultMsg = "succeed" }
+                        .apply {
+                            bookedTicket?.price = session.tickets[index].price
+                            bookedTicket?.discountPrice = session.tickets[index].discountPrice
+                            resultMsg = "succeed"
+                        }
                         .also {
                             logger.info { "Client = $clientId successfully booked a ticket" }
                         }
@@ -169,20 +184,27 @@ class TicketBookingClientServiceImpl(
             }
         }
 
+        // Get user's client profile
+        val client = clientRepository
+            .findByIdOrNull(clientId)
+            ?: return BookingResultToBookingResultDtoMapper[bookingResult].also {
+                logger.error {
+                    "Error booking cancellation: a client with ID = $clientId doesn't exist in the database"
+                }
+            }
+
         // Check if a ticket with the seat number we got already booked
         when (session.tickets[index].isBooked) {
             true -> {
                 // Unmark a ticket as booked
                 session.tickets[index].isBooked = false
 
+                // Return default price
+                session.tickets[index].discountPrice = session.tickets[index].price
+
                 // Remove a ticket from its client
-                try {
-                    removeTicket(clientId, session.tickets[index])
-                } catch (e: NoSuchElementException) {
-                    logger.error {
-                        "Error booking cancellation: a client with ID = $clientId doesn't exist in the database"
-                    }
-                    return BookingResultToBookingResultDtoMapper[bookingResult]
+                client.tickets.remove(session.tickets[index]).also {
+                    clientRepository.save(client)
                 }
 
                 val updatedId = sessionRepository
@@ -191,7 +213,11 @@ class TicketBookingClientServiceImpl(
 
                 if (updatedId == sessionId) {
                     bookingResult
-                        .apply { resultMsg = "succeed" }
+                        .apply {
+                            bookedTicket?.price = session.tickets[index].price
+                            bookedTicket?.discountPrice = session.tickets[index].discountPrice
+                            resultMsg = "succeed"
+                        }
                         .also {
                             logger.info { "Client = $clientId successfully cancel the booking" }
                         }
@@ -219,41 +245,15 @@ class TicketBookingClientServiceImpl(
             ?.map(TicketToTicketDtoMapper::get)
             ?: emptyList()
 
-    private fun addTicket(clientId: Long, ticket: Ticket) {
-        val client = clientRepository
-            .findByIdOrNull(clientId)
-            ?: throw NoSuchElementException("no such client")
-
-        client.tickets.add(ticket)
-
-        val updatedId = clientRepository
-            .save(client)
-            .id
-
-        if (updatedId == clientId) {
-            logger.info { "A ticket successfully added to client = $clientId" }
-        } else {
-            logger.error { "Error adding ticket: updated ID ($updatedId) != provided ID ($clientId)" }
+    private fun calcTicketDiscountPrice(price: Double, categoryNumber: Int): Double =
+        with (appProperties) {
+            when (Category.values()[categoryNumber]) {
+                Category.SOCIAL_ONE -> price - (price * socialOneDiscountPercentage / 100)
+                Category.SOCIAL_TWO -> price - (price * socialTwoDiscountPercentage / 100)
+                Category.SOCIAL_THREE -> price - (price * socialThreeDiscountPercentage / 100)
+                else -> price
+            }
         }
-    }
-
-    private fun removeTicket(clientId: Long, ticket: Ticket) {
-        val client = clientRepository
-            .findByIdOrNull(clientId)
-            ?: throw NoSuchElementException("no such client")
-
-        client.tickets.remove(ticket)
-
-        val updatedId = clientRepository
-            .save(client)
-            .id
-
-        if (updatedId == clientId) {
-            logger.info { "A ticket successfully removed from client = $clientId" }
-        } else {
-            logger.error { "Error removing ticket: updated ID ($updatedId) != provided ID ($clientId)" }
-        }
-    }
 
     companion object {
         private val logger = KotlinLogging.logger {}

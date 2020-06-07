@@ -9,6 +9,8 @@ object TicketDtoToTicketMapper : Mapper<TicketDto, Ticket> {
 
     override fun get(from: TicketDto): Ticket =
         Ticket(
+            price = from.price,
+            discountPrice = from.discountPrice,
             movie = from.movie,
             date = StringToLocalDateTimeMapper[from.date],
             seat = from.seat

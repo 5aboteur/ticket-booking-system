@@ -14,7 +14,7 @@ object ClientProfileDtoToClientMapper : Mapper<ClientProfileDto, Client> {
                 .checkAndGet(from.category)
                 .takeIf { it != Category.UNKNOWN }
                 ?.ordinal
-                ?: throw UnknownCategoryException("unknown category - ${from.category}"),
+                ?: throw UnknownCategoryException(from.category),
             tickets = from.tickets
                 ?.map(TicketDtoToTicketMapper::get)
                 ?.toMutableList()
