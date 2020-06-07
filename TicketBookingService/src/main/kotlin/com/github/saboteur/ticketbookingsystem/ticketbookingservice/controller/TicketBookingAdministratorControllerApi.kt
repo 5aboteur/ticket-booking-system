@@ -132,6 +132,20 @@ interface TicketBookingAdministratorControllerApi {
         sessionId: Long
     ): ResponseEntity<Boolean>
 
+    // Miscellaneous
+
+    @ApiOperation(value = "Get the social benefits rule status")
+    @GetMapping(value = ["/$API_VERSION/administrator/miscellaneous/social-benefits"])
+    fun getSocialBenefitsRuleStatus(): ResponseEntity<String>
+
+    @ApiOperation(value = "Change the social benefits rule status")
+    @PutMapping(value = ["/$API_VERSION/administrator/miscellaneous/social-benefits"])
+    fun changeSocialBenefitsRuleStatus(
+        @ApiParam(value = "New status", required = true)
+        @RequestParam(value = "status")
+        status: Boolean
+    ): ResponseEntity<String>
+
     companion object {
         const val API_VERSION = "v1"
     }

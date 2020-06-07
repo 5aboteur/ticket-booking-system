@@ -11,7 +11,6 @@ import com.github.saboteur.ticketbookingsystem.ticketbookingservice.mapper.dto.B
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.mapper.dto.SessionToSessionOutDtoMapper
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.mapper.dto.TicketToSeatDtoMapper
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.mapper.dto.TicketToTicketDtoMapper
-import com.github.saboteur.ticketbookingsystem.ticketbookingservice.model.Ticket
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.model.booking.BookedTicket
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.model.booking.BookingResult
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.repository.ClientRepository
@@ -106,9 +105,12 @@ class TicketBookingClientServiceImpl(
                 // Mark a ticket as booked
                 session.tickets[index].isBooked = true
 
-                // Calculate discount price
+                // Calculate discount price, if the 'social benefits' rule disabled - return full price
                 session.tickets[index].discountPrice =
-                    calcTicketDiscountPrice(session.tickets[index].price, client.category)
+                    if (appProperties.socialBenefits)
+                        calcTicketDiscountPrice(session.tickets[index].price, client.category)
+                    else
+                        session.tickets[index].price
 
                 // Add a ticket to its client
                 client.tickets.add(session.tickets[index]).also {

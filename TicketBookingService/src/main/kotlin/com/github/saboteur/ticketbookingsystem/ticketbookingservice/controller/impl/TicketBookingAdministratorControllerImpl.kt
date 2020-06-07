@@ -1,5 +1,6 @@
 package com.github.saboteur.ticketbookingsystem.ticketbookingservice.controller.impl
 
+import com.github.saboteur.ticketbookingsystem.ticketbookingservice.config.properties.AppProperties
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.controller.TicketBookingAdministratorControllerApi
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.RescheduleSessionDto
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.SessionInDto
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController
 @Api
 @RestController
 class TicketBookingAdministratorControllerImpl(
+    private val appProperties: AppProperties,
     private val ticketBookingAdministratorService: TicketBookingAdministratorService
 ) : TicketBookingAdministratorControllerApi {
 
@@ -154,6 +156,24 @@ class TicketBookingAdministratorControllerImpl(
                     HttpStatus.OK
             )
             .body(result)
+    }
+
+    override fun getSocialBenefitsRuleStatus(): ResponseEntity<String> =
+        ResponseEntity.ok(
+            if (appProperties.socialBenefits)
+                "ENABLED"
+            else
+                "DISABLED"
+        )
+
+    override fun changeSocialBenefitsRuleStatus(status: Boolean): ResponseEntity<String> {
+        appProperties.socialBenefits = status
+        return ResponseEntity.ok(
+            if (appProperties.socialBenefits)
+                "ENABLED"
+            else
+                "DISABLED"
+        )
     }
 
 }
