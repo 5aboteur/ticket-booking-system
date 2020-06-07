@@ -22,7 +22,7 @@ data class SessionDto(
     val endDate: String,
 
     @ApiModelProperty(value = "seats")
-    val seats: List<SeatDto>
+    val tickets: List<TicketDto>
 
 ) {
     companion object {
@@ -32,7 +32,7 @@ data class SessionDto(
             remainingTickets = 0,
             beginDate = "",
             endDate = "",
-            seats = emptyList()
+            tickets = emptyList()
         )
     }
 }

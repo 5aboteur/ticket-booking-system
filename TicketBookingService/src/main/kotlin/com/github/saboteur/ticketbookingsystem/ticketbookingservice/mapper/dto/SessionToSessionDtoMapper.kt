@@ -10,11 +10,13 @@ object SessionToSessionDtoMapper : Mapper<Session, SessionDto> {
     override fun get(from: Session): SessionDto =
         SessionDto(
             movie = MovieToMovieDtoMapper[from.movie],
-            numberOfTickets = from.numberOfTickets,
-            remainingTickets = from.remainingTickets,
+            numberOfTickets = from.tickets.size,
+            remainingTickets = from.tickets
+                .filter { it.isBooked }
+                .count(),
             beginDate = LocalDateTimeToStringMapper[from.beginDate],
             endDate = LocalDateTimeToStringMapper[from.endDate],
-            seats = from.seats.map(SeatToSeatDtoMapper::get)
+            tickets = from.tickets.map(TicketToTicketDtoMapper::get)
         )
 
 }

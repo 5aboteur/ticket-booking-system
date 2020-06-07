@@ -2,13 +2,13 @@ package com.github.saboteur.ticketbookingsystem.ticketbookingservice.mapper.dto
 
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.SeatDto
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.mapper.Mapper
-import com.github.saboteur.ticketbookingsystem.ticketbookingservice.model.Seat
+import com.github.saboteur.ticketbookingsystem.ticketbookingservice.model.Ticket
 
-object SeatToSeatDtoMapper : Mapper<Seat, SeatDto> {
+object TicketToSeatDtoMapper : Mapper<Ticket, SeatDto> {
 
-    override fun get(from: Seat): SeatDto =
+    override fun get(from: Ticket): SeatDto =
         SeatDto(
-            number = from.number,
+            number = from.seat,
             isBooked = from.isBooked
         )
 

@@ -16,14 +16,18 @@ data class Ticket(
     val date: LocalDateTime = LocalDateTime.MIN,
 
     @Column(name = "seat")
-    val seat: String = ""
+    val seat: String = "",
+
+    @Column(name = "is_booked")
+    var isBooked: Boolean = false
 
 ) : BaseModel() {
     companion object {
         val empty = Ticket(
             movie = "",
             date = LocalDateTime.MIN,
-            seat = ""
+            seat = "",
+            isBooked = false
         )
     }
 }
