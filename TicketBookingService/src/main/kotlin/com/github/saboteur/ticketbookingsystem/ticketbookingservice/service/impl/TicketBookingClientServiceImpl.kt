@@ -18,6 +18,7 @@ import mu.KotlinLogging
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class TicketBookingClientServiceImpl(
@@ -25,18 +26,21 @@ class TicketBookingClientServiceImpl(
     private val clientRepository: ClientRepository
 ) : TicketBookingClientService {
 
+    @Transactional
     override fun getAllSessions(pageIndex: Int, pageSize: Int): List<SessionDto> =
         sessionRepository
             .findAll(PageRequest.of(pageIndex, pageSize))
             .map(SessionToSessionDtoMapper::get)
             .toList()
 
+    @Transactional
     override fun getActiveSessions(pageIndex: Int, pageSize: Int): List<SessionDto> =
         sessionRepository
             .findAllActive(PageRequest.of(pageIndex, pageSize))
             .map(SessionToSessionDtoMapper::get)
             .toList()
 
+    @Transactional
     override fun getSeats(sessionId: Long): List<SeatDto> =
         sessionRepository
             .findByIdOrNull(sessionId)
@@ -44,6 +48,7 @@ class TicketBookingClientServiceImpl(
             ?.map(TicketToSeatDtoMapper::get)
             ?: emptyList()
 
+    @Transactional
     override fun bookTicket(clientId: Long, sessionId: Long, seatNumber: String): BookingResultDto {
         // This object will store a detailed result of booking
         val bookingResult = BookingResult().apply {
@@ -111,6 +116,7 @@ class TicketBookingClientServiceImpl(
         return BookingResultToBookingResultDtoMapper[bookingResult]
     }
 
+    @Transactional
     override fun cancelBooking(clientId: Long, sessionId: Long, seatNumber: String): BookingResultDto {
         // This object will store a detailed result of booking cancellation
         val bookingResult = BookingResult().apply {
@@ -171,6 +177,7 @@ class TicketBookingClientServiceImpl(
         return BookingResultToBookingResultDtoMapper[bookingResult]
     }
 
+    @Transactional
     override fun getTickets(clientId: Long): List<TicketDto> =
         clientRepository
             .findByIdOrNull(clientId)

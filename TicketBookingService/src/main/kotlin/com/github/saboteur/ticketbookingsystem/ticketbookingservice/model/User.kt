@@ -17,10 +17,10 @@ data class User(
     val email: String = "",
 
     @OneToOne(cascade = [CascadeType.ALL])
-    val admin: Administrator? = null,
+    var admin: Administrator? = null,
 
     @OneToOne(cascade = [CascadeType.ALL])
-    val client: Client? = null
+    var client: Client? = null
 
 ) : BaseModel() {
     companion object {

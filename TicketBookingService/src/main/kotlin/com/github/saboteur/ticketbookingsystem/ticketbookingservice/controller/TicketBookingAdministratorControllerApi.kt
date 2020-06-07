@@ -1,7 +1,8 @@
 package com.github.saboteur.ticketbookingsystem.ticketbookingservice.controller
 
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.SessionDto
-import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.UserDto
+import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.UserInDto
+import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.UserOutDto
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiParam
@@ -35,7 +36,7 @@ interface TicketBookingAdministratorControllerApi {
         @ApiParam(value = "Page size", defaultValue = "10", example = "10")
         @RequestParam(value = "pageSize")
         pageSize: Int
-    ): ResponseEntity<List<UserDto>>
+    ): ResponseEntity<List<UserOutDto>>
 
     // User API
 
@@ -44,7 +45,7 @@ interface TicketBookingAdministratorControllerApi {
     fun createUser(
         @ApiParam(value = "User data")
         @RequestBody(required = true)
-        userDto: UserDto
+        userInDto: UserInDto
     ): ResponseEntity<Long>
 
     @ApiOperation(value = "Get a user by ID")
@@ -53,7 +54,7 @@ interface TicketBookingAdministratorControllerApi {
         @ApiParam(value = "User ID", required = true, defaultValue = "666", example = "666")
         @PathVariable(value = "userId")
         userId: Long
-    ): ResponseEntity<UserDto?>
+    ): ResponseEntity<UserOutDto?>
 
     @ApiOperation(value = "Update an existing user")
     @PutMapping(value = ["/$API_VERSION/administrator/user/{userId}"])
@@ -64,12 +65,28 @@ interface TicketBookingAdministratorControllerApi {
 
         @ApiParam(value = "User data")
         @RequestBody(required = true)
-        userDto: UserDto
+        userInDto: UserInDto
     ): ResponseEntity<Boolean>
 
     @ApiOperation(value = "Delete an existing user")
     @DeleteMapping(value = ["/$API_VERSION/administrator/user/{userId}"])
     fun deleteUser(
+        @ApiParam(value = "User ID", required = true, defaultValue = "666", example = "666")
+        @PathVariable(value = "userId")
+        userId: Long
+    ): ResponseEntity<Boolean>
+
+    @ApiOperation(value = "Give user administrator rights")
+    @PutMapping(value = ["/$API_VERSION/administrator/user/{userId}/admin-rights"])
+    fun giveAdminRights(
+        @ApiParam(value = "User ID", required = true, defaultValue = "666", example = "666")
+        @PathVariable(value = "userId")
+        userId: Long
+    ): ResponseEntity<Boolean>
+
+    @ApiOperation(value = "Remove administrator rights from user")
+    @DeleteMapping(value = ["/$API_VERSION/administrator/user/{userId}/admin-rights"])
+    fun removeAdminRights(
         @ApiParam(value = "User ID", required = true, defaultValue = "666", example = "666")
         @PathVariable(value = "userId")
         userId: Long

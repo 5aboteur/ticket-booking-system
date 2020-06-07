@@ -2,7 +2,8 @@ package com.github.saboteur.ticketbookingsystem.ticketbookingservice.controller.
 
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.controller.TicketBookingAdministratorControllerApi
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.SessionDto
-import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.UserDto
+import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.UserInDto
+import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.UserOutDto
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.service.TicketBookingAdministratorService
 import io.swagger.annotations.Api
 import org.springframework.http.HttpStatus
@@ -15,7 +16,7 @@ class TicketBookingAdministratorControllerImpl(
     private val ticketBookingAdministratorService: TicketBookingAdministratorService
 ) : TicketBookingAdministratorControllerApi {
 
-    override fun getAllUsers(pageIndex: Int, pageSize: Int): ResponseEntity<List<UserDto>> {
+    override fun getAllUsers(pageIndex: Int, pageSize: Int): ResponseEntity<List<UserOutDto>> {
         val result = ticketBookingAdministratorService.getAllUsers(pageIndex, pageSize)
         return ResponseEntity
             .status(
@@ -27,8 +28,8 @@ class TicketBookingAdministratorControllerImpl(
             .body(result)
     }
 
-    override fun createUser(userDto: UserDto): ResponseEntity<Long> {
-        val result = ticketBookingAdministratorService.createUser(userDto)
+    override fun createUser(userInDto: UserInDto): ResponseEntity<Long> {
+        val result = ticketBookingAdministratorService.createUser(userInDto)
         return ResponseEntity
             .status(
                 if (result == -1L || result == 0L)
@@ -39,7 +40,7 @@ class TicketBookingAdministratorControllerImpl(
             .body(result)
     }
 
-    override fun getUser(userId: Long): ResponseEntity<UserDto?> {
+    override fun getUser(userId: Long): ResponseEntity<UserOutDto?> {
         val result = ticketBookingAdministratorService.getUser(userId)
         return ResponseEntity
             .status(
@@ -51,8 +52,8 @@ class TicketBookingAdministratorControllerImpl(
             .body(result)
     }
 
-    override fun updateUser(userId: Long, userDto: UserDto): ResponseEntity<Boolean> {
-        val result = ticketBookingAdministratorService.updateUser(userId, userDto)
+    override fun updateUser(userId: Long, userInDto: UserInDto): ResponseEntity<Boolean> {
+        val result = ticketBookingAdministratorService.updateUser(userId, userInDto)
         return ResponseEntity
             .status(
                 when (result) {
@@ -66,6 +67,31 @@ class TicketBookingAdministratorControllerImpl(
 
     override fun deleteUser(userId: Long): ResponseEntity<Boolean> {
         val result = ticketBookingAdministratorService.deleteUser(userId)
+        return ResponseEntity
+            .status(
+                if (result == null)
+                    HttpStatus.NOT_FOUND
+                else
+                    HttpStatus.OK
+            )
+            .body(result)
+    }
+
+    override fun giveAdminRights(userId: Long): ResponseEntity<Boolean> {
+        val result = ticketBookingAdministratorService.giveAdminRights(userId)
+        return ResponseEntity
+            .status(
+                when (result) {
+                    true -> HttpStatus.OK
+                    false -> HttpStatus.BAD_REQUEST
+                    null -> HttpStatus.NOT_FOUND
+                }
+            )
+            .body(result)
+    }
+
+    override fun removeAdminRights(userId: Long): ResponseEntity<Boolean> {
+        val result = ticketBookingAdministratorService.removeAdminRights(userId)
         return ResponseEntity
             .status(
                 if (result == null)
