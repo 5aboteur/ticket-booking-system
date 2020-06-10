@@ -1,5 +1,6 @@
 package com.github.saboteur.ticketbookingsystem.ticketbookingservice.mapper.dto
 
+import com.github.saboteur.ticketbookingsystem.ticketbookingservice.domain.Category
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.UserOutDto
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.mapper.Mapper
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.model.User
@@ -11,7 +12,10 @@ object UserToUserDtoMapper : Mapper<User, UserOutDto> {
             login = from.login,
             email = from.email,
             isAdmin = from.isAdmin,
-            clientProfile = from.client?.let { ClientToClientProfileDtoMapper[it] }
+            category = Category
+                .values()[from.category]
+                .categoryName,
+            tickets = from.tickets.map(TicketToTicketDtoMapper::get)
         )
 
 }

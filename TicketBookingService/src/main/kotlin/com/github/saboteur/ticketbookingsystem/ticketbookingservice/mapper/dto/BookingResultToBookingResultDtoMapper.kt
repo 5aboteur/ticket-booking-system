@@ -8,7 +8,7 @@ object BookingResultToBookingResultDtoMapper : Mapper<BookingResult, BookingResu
 
     override fun get(from: BookingResult): BookingResultDto =
         BookingResultDto(
-            clientId = from.clientId,
+            userId = from.userId,
             sessionId = from.sessionId,
             ticket = from.bookedTicket?.let { BookedTicketToTicketDtoMapper[it] },
             operation = from.operation.operationName

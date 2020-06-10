@@ -14,8 +14,8 @@ import com.github.saboteur.ticketbookingsystem.ticketbookingservice.mapper.dto.T
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.model.SessionState
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.model.booking.BookedTicket
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.model.booking.BookingResult
-import com.github.saboteur.ticketbookingsystem.ticketbookingservice.repository.ClientRepository
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.repository.SessionRepository
+import com.github.saboteur.ticketbookingsystem.ticketbookingservice.repository.UserRepository
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.service.ClientService
 import mu.KotlinLogging
 import org.springframework.data.domain.PageRequest
@@ -29,7 +29,7 @@ class ClientServiceImpl(
     private val appProperties: AppProperties,
     private val sessionStateStorage: ConcurrentMap<Long, SessionState>,
     private val sessionRepository: SessionRepository,
-    private val clientRepository: ClientRepository
+    private val userRepository: UserRepository
 ) : ClientService {
 
     @Transactional
@@ -55,24 +55,24 @@ class ClientServiceImpl(
             ?: emptyList()
 
     @Transactional
-    override fun bookTicket(clientId: Long, sessionId: Long, seatNumber: String): BookingResultDto {
+    override fun bookTicket(userId: Long, sessionId: Long, seatNumber: String): BookingResultDto {
         // This object will store a detailed result of booking
         val bookingResult = BookingResult().apply {
-            this.clientId = clientId
+            this.userId = userId
             this.sessionId = sessionId
         }
 
-        // Get the user's client profile
-        val client = clientRepository
-            .findByIdOrNull(clientId)
+        // Get the user's profile
+        val user = userRepository
+            .findByIdOrNull(userId)
             ?: return BookingResultToBookingResultDtoMapper[bookingResult].also {
                 logger.error {
-                    "Error booking ticket: a client with ID = $clientId doesn't exist in the database"
+                    "Error booking ticket: a user with ID = $userId doesn't exist in the database"
                 }
             }
 
         // If the user has the standard category and the booking doesn't open for everyone yet - reject it
-        if (client.category == Category.STANDARD.ordinal) {
+        if (user.category == Category.STANDARD.ordinal) {
             val s = sessionStateStorage[sessionId]
                 ?: return BookingResultToBookingResultDtoMapper[bookingResult].also {
                     logger.error {
@@ -139,13 +139,13 @@ class ClientServiceImpl(
                 // Calculate discount price, if the 'social benefits' rule disabled - return full price
                 session.tickets[index].discountPrice =
                     if (appProperties.socialBenefits)
-                        calcTicketDiscountPrice(session.tickets[index].price, client.category)
+                        calcTicketDiscountPrice(session.tickets[index].price, user.category)
                     else
                         session.tickets[index].price
 
-                // Add a ticket to its client
-                client.tickets.add(session.tickets[index]).also {
-                    clientRepository.save(client)
+                // Add a ticket to its user
+                user.tickets.add(session.tickets[index]).also {
+                    userRepository.save(user)
                 }
 
                 val updatedId = sessionRepository
@@ -160,7 +160,7 @@ class ClientServiceImpl(
                             operation = BookingOperation.CREATED
                         }
                         .also {
-                            logger.info { "Client = $clientId successfully booked a ticket" }
+                            logger.info { "User = $userId successfully booked a ticket" }
                         }
                 } else {
                     logger.error {
@@ -179,10 +179,10 @@ class ClientServiceImpl(
     }
 
     @Transactional
-    override fun cancelBooking(clientId: Long, sessionId: Long, seatNumber: String): BookingResultDto {
+    override fun cancelBooking(userId: Long, sessionId: Long, seatNumber: String): BookingResultDto {
         // This object will store a detailed result of booking cancellation
         val bookingResult = BookingResult().apply {
-            this.clientId = clientId
+            this.userId = userId
             this.sessionId = sessionId
         }
 
@@ -215,12 +215,12 @@ class ClientServiceImpl(
             }
         }
 
-        // Get the user's client profile
-        val client = clientRepository
-            .findByIdOrNull(clientId)
+        // Get the user's profile
+        val user = userRepository
+            .findByIdOrNull(userId)
             ?: return BookingResultToBookingResultDtoMapper[bookingResult].also {
                 logger.error {
-                    "Error booking cancellation: a client with ID = $clientId doesn't exist in the database"
+                    "Error booking cancellation: a user with ID = $userId doesn't exist in the database"
                 }
             }
 
@@ -233,9 +233,9 @@ class ClientServiceImpl(
                 // Return default price
                 session.tickets[index].discountPrice = session.tickets[index].price
 
-                // Remove a ticket from its client
-                client.tickets.remove(session.tickets[index]).also {
-                    clientRepository.save(client)
+                // Remove a ticket from its user
+                user.tickets.remove(session.tickets[index]).also {
+                    userRepository.save(user)
                 }
 
                 val updatedId = sessionRepository
@@ -250,7 +250,7 @@ class ClientServiceImpl(
                             operation = BookingOperation.CANCELED
                         }
                         .also {
-                            logger.info { "Client = $clientId successfully cancel the booking" }
+                            logger.info { "User = $userId successfully cancel the booking" }
                         }
                 } else {
                     logger.error {
@@ -269,9 +269,9 @@ class ClientServiceImpl(
     }
 
     @Transactional
-    override fun getTickets(clientId: Long): List<TicketDto> =
-        clientRepository
-            .findByIdOrNull(clientId)
+    override fun getTickets(userId: Long): List<TicketDto> =
+        userRepository
+            .findByIdOrNull(userId)
             ?.tickets
             ?.map(TicketToTicketDtoMapper::get)
             ?: emptyList()

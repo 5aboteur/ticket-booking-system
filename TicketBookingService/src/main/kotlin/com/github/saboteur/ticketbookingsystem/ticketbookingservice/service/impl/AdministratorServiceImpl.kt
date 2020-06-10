@@ -93,12 +93,9 @@ class AdministratorServiceImpl(
                             return false
                         }
 
-                    val updatedCategory = updatedUser.client?.category
-
                     with (updatedUser) {
                         id = user.id
                         isAdmin = user.isAdmin
-                        client = user.client?.apply { category = updatedCategory ?: 0 }
                     }
 
                     val updatedId = userRepository
@@ -244,8 +241,6 @@ class AdministratorServiceImpl(
                         beginDate = StringToLocalDateTimeMapper[rescheduleSessionDto.beginDate]
                         endDate = StringToLocalDateTimeMapper[rescheduleSessionDto.endDate]
                     }
-
-//                    updatedSession.id = session.id
 
                     val updatedId = sessionRepository
                         .save(updatedSession)

@@ -53,18 +53,18 @@ class ClientControllerImpl(
             .body(result)
     }
 
-    override fun bookTicket(clientId: Long, sessionId: Long, seatNumber: String): ResponseEntity<BookingResultDto> {
-        val result = clientService.bookTicket(clientId, sessionId, seatNumber)
+    override fun bookTicket(userId: Long, sessionId: Long, seatNumber: String): ResponseEntity<BookingResultDto> {
+        val result = clientService.bookTicket(userId, sessionId, seatNumber)
         return ResponseEntity.ok(result)
     }
 
-    override fun cancelBooking(clientId: Long, sessionId: Long, seatNumber: String): ResponseEntity<BookingResultDto> {
-        val result = clientService.cancelBooking(clientId, sessionId, seatNumber)
+    override fun cancelBooking(userId: Long, sessionId: Long, seatNumber: String): ResponseEntity<BookingResultDto> {
+        val result = clientService.cancelBooking(userId, sessionId, seatNumber)
         return ResponseEntity.ok(result)
     }
 
-    override fun getTickets(clientId: Long): ResponseEntity<List<TicketDto>> {
-        val result = clientService.getTickets(clientId)
+    override fun getTickets(userId: Long): ResponseEntity<List<TicketDto>> {
+        val result = clientService.getTickets(userId)
         return ResponseEntity
             .status(
                 if (result.isEmpty())

@@ -15,8 +15,11 @@ data class UserOutDto(
     @ApiModelProperty(value = "isAdmin")
     val isAdmin: Boolean,
 
-    @ApiModelProperty(value = "clientProfile")
-    val clientProfile: ClientProfileDto?
+    @ApiModelProperty(value = "category")
+    val category: String,
+
+    @ApiModelProperty(value = "tickets")
+    val tickets: List<TicketDto>?
 
 ) {
     companion object {
@@ -24,7 +27,8 @@ data class UserOutDto(
             login = "",
             email = "",
             isAdmin = false,
-            clientProfile = null
+            category = "",
+            tickets = null
         )
     }
 }

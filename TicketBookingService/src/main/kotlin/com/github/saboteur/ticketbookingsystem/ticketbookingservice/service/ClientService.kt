@@ -11,9 +11,9 @@ interface ClientService {
     fun getActiveSessions(pageIndex: Int, pageSize: Int): List<SessionOutDto>
 
     fun getSeats(sessionId: Long): List<SeatDto>
-    fun bookTicket(clientId: Long, sessionId: Long, seatNumber: String): BookingResultDto
-    fun cancelBooking(clientId: Long, sessionId: Long, seatNumber: String): BookingResultDto
+    fun bookTicket(userId: Long, sessionId: Long, seatNumber: String): BookingResultDto
+    fun cancelBooking(userId: Long, sessionId: Long, seatNumber: String): BookingResultDto
 
-    fun getTickets(clientId: Long): List<TicketDto>
+    fun getTickets(userId: Long): List<TicketDto>
 
 }

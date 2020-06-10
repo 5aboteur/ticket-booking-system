@@ -60,11 +60,11 @@ interface ClientControllerApi {
     ): ResponseEntity<List<SeatDto>>
 
     @ApiOperation(value = "Book a ticket")
-    @PostMapping(value = ["/$API_VERSION/client/{clientId}/session/{sessionId}/book"])
+    @PostMapping(value = ["/$API_VERSION/client/{userId}/session/{sessionId}/book"])
     fun bookTicket(
-        @ApiParam(value = "Client ID", required = true, defaultValue = "666", example = "666")
-        @PathVariable(value = "clientId")
-        clientId: Long,
+        @ApiParam(value = "User ID", required = true, defaultValue = "666", example = "666")
+        @PathVariable(value = "userId")
+        userId: Long,
 
         @ApiParam(value = "Session ID", required = true, defaultValue = "666", example = "666")
         @PathVariable(value = "sessionId")
@@ -76,11 +76,11 @@ interface ClientControllerApi {
     ): ResponseEntity<BookingResultDto>
 
     @ApiOperation(value = "Cancel booking")
-    @DeleteMapping(value = ["/$API_VERSION/client/{clientId}/session/{sessionId}/book"])
+    @DeleteMapping(value = ["/$API_VERSION/client/{userId}/session/{sessionId}/book"])
     fun cancelBooking(
-        @ApiParam(value = "Client ID", required = true, defaultValue = "666", example = "666")
-        @PathVariable(value = "clientId")
-        clientId: Long,
+        @ApiParam(value = "User ID", required = true, defaultValue = "666", example = "666")
+        @PathVariable(value = "userId")
+        userId: Long,
 
         @ApiParam(value = "Session ID", required = true, defaultValue = "666", example = "666")
         @PathVariable(value = "sessionId")
@@ -94,11 +94,11 @@ interface ClientControllerApi {
     // Client API
 
     @ApiOperation(value = "Get client tickets")
-    @GetMapping(value = ["/$API_VERSION/client/{clientId}/tickets"])
+    @GetMapping(value = ["/$API_VERSION/client/{userId}/tickets"])
     fun getTickets(
-        @ApiParam(value = "Client ID", required = true, defaultValue = "666", example = "666")
-        @PathVariable(value = "clientId")
-        clientId: Long
+        @ApiParam(value = "User ID", required = true, defaultValue = "666", example = "666")
+        @PathVariable(value = "userId")
+        userId: Long
     ): ResponseEntity<List<TicketDto>>
 
     companion object {

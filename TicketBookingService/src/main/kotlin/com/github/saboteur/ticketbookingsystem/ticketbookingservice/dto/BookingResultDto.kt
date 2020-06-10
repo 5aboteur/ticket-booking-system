@@ -6,8 +6,8 @@ import io.swagger.annotations.ApiModelProperty
 @ApiModel(value = "BookingResult")
 data class BookingResultDto(
 
-    @ApiModelProperty(value = "clientId")
-    val clientId: Long,
+    @ApiModelProperty(value = "userId")
+    val userId: Long,
 
     @ApiModelProperty(value = "sessionId")
     val sessionId: Long,
@@ -21,7 +21,7 @@ data class BookingResultDto(
 ) {
     companion object {
         val empty = BookingResultDto(
-            clientId = -1L,
+            userId = -1L,
             sessionId = -1L,
             ticket = null,
             operation = ""

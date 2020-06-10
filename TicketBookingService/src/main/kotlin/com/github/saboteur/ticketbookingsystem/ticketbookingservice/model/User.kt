@@ -3,7 +3,7 @@ package com.github.saboteur.ticketbookingsystem.ticketbookingservice.model
 import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
-import javax.persistence.OneToOne
+import javax.persistence.OneToMany
 import javax.persistence.Table
 
 @Entity
@@ -19,8 +19,11 @@ data class User(
     @Column(name = "is_admin")
     var isAdmin: Boolean = false,
 
-    @OneToOne(cascade = [CascadeType.ALL])
-    var client: Client? = null
+    @Column(name = "category")
+    var category: Int = 0,
+
+    @OneToMany(cascade = [CascadeType.ALL])
+    val tickets: MutableList<Ticket> = mutableListOf()
 
 ) : BaseModel() {
     companion object {
@@ -28,7 +31,8 @@ data class User(
             login = "",
             email = "",
             isAdmin = false,
-            client = null
+            category = 0,
+            tickets = mutableListOf()
         )
     }
 }
