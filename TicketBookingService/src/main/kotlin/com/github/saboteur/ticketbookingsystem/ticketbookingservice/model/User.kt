@@ -16,8 +16,8 @@ data class User(
     @Column(name = "email")
     val email: String = "",
 
-    @OneToOne(cascade = [CascadeType.ALL])
-    var admin: Administrator? = null,
+    @Column(name = "is_admin")
+    var isAdmin: Boolean = false,
 
     @OneToOne(cascade = [CascadeType.ALL])
     var client: Client? = null
@@ -27,7 +27,7 @@ data class User(
         val empty = User(
             login = "",
             email = "",
-            admin = null,
+            isAdmin = false,
             client = null
         )
     }

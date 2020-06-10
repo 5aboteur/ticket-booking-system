@@ -13,7 +13,7 @@ object UserInDtoToUserMapper : Mapper<UserInDto, User> {
         User(
             login = from.login,
             email = from.email,
-            admin = null,
+            isAdmin = false,
             client = Client.empty
                 .apply {
                     category = Category

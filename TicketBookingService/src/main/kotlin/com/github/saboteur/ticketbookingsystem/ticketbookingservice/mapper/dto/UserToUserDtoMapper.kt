@@ -10,7 +10,7 @@ object UserToUserDtoMapper : Mapper<User, UserOutDto> {
         UserOutDto(
             login = from.login,
             email = from.email,
-            isAdmin = from.admin != null,
+            isAdmin = from.isAdmin,
             clientProfile = from.client?.let { ClientToClientProfileDtoMapper[it] }
         )
 

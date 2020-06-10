@@ -10,10 +10,8 @@ import com.github.saboteur.ticketbookingsystem.ticketbookingservice.mapper.dto.S
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.mapper.dto.UserToUserDtoMapper
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.mapper.model.SessionInDtoToSessionMapper
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.mapper.model.UserInDtoToUserMapper
-import com.github.saboteur.ticketbookingsystem.ticketbookingservice.model.Administrator
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.model.SessionState
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.model.User
-import com.github.saboteur.ticketbookingsystem.ticketbookingservice.repository.AdministratorRepository
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.repository.SessionRepository
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.repository.UserRepository
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.service.AdministratorService
@@ -28,7 +26,6 @@ import java.util.concurrent.ConcurrentMap
 class AdministratorServiceImpl(
     private val sessionStateStorage: ConcurrentMap<Long, SessionState>,
     private val sessionRepository: SessionRepository,
-    private val administratorRepository: AdministratorRepository,
     private val userRepository: UserRepository
 ) : AdministratorService {
 
@@ -84,11 +81,23 @@ class AdministratorServiceImpl(
             ?.let { user ->
                 try {
                     val updatedUser = UserInDtoToUserMapper[userInDto]
+
+                    // Keep login unique in the database
+                    userRepository
+                        .findByLoginOrNull(updatedUser.login)
+                        ?.let {
+                            logger.error {
+                                "Error updating user: a user with login = ${userInDto.login} " +
+                                    "already exists in the database"
+                            }
+                            return false
+                        }
+
                     val updatedCategory = updatedUser.client?.category
 
                     with (updatedUser) {
                         id = user.id
-                        admin = user.admin
+                        isAdmin = user.isAdmin
                         client = user.client?.apply { category = updatedCategory ?: 0 }
                     }
 
@@ -135,9 +144,9 @@ class AdministratorServiceImpl(
     override fun giveAdminRights(userId: Long): Boolean? =
         userRepository
             .findByIdOrNull(userId)
-            .takeIf { it?.admin == null }
+            .takeIf { it?.isAdmin == false }
             ?.let { user ->
-                user.admin = Administrator()
+                user.isAdmin = true
                 val updatedId = userRepository
                     .save(user)
                     .id
@@ -159,15 +168,25 @@ class AdministratorServiceImpl(
                 }
             }
 
-    // TODO: fix this
     @Transactional
     override fun removeAdminRights(userId: Long): Boolean? =
         userRepository
             .findByIdOrNull(userId)
             ?.let { user ->
-                user.admin?.id?.let { administratorRepository.deleteById(it) }
-                logger.info { "User with ID = $userId has lost administrator rights" }
-                true
+                user.isAdmin = false
+                val updatedId = userRepository
+                    .save(user)
+                    .id
+
+                if (updatedId == userId) {
+                    logger.info { "User with ID = $userId has lost administrator rights" }
+                    true
+                } else {
+                    logger.error {
+                        "Error removing admin rights: updated ID ($updatedId) != provided ID ($userId)"
+                    }
+                    false
+                }
             }
             ?: (null).also {
                 logger.error {
