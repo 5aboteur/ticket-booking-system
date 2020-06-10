@@ -91,6 +91,16 @@ class ClientServiceImpl(
             }
         }
 
+        // All active sessions stored in memory, skip booking if it's not there
+        if (sessionStateStorage[sessionId] == null) {
+            return BookingResultToBookingResultDtoMapper[bookingResult].also {
+                logger.error {
+                    "Error booking ticket: a session with ID = $sessionId doesn't exist in the session state storage, " +
+                        "perhaps it's not relevant already"
+                }
+            }
+        }
+
         // Check if a session with the provided ID actually exists
         val session = sessionRepository
             .findByIdOrNull(sessionId)

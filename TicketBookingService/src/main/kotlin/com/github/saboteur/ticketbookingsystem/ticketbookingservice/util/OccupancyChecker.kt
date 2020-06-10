@@ -23,8 +23,8 @@ class OccupancyChecker(
         logger.info { "OccupancyChecker - Sessions occupancy check process has begun" }
 
         for ((sessionId, sessionState) in sessionStateStorage.entries) {
+            val now = LocalDateTime.now()
             if (!sessionState.isOpenForEveryone) {
-                val now = LocalDateTime.now()
                 val timeWhenStandardCategoryCanBook =
                     sessionState
                         .beginDate
@@ -54,7 +54,15 @@ class OccupancyChecker(
                     }
                 }
             }
+
+            // If a session already started we need to remove it from the storage to prevent booking
+            if (now >= sessionState.beginDate) {
+                sessionStateStorage.remove(sessionId)
+                logger.info { "Session with ID = $sessionId removed from the session state storage" }
+            }
         }
+
+        logger.info { "The system has ${sessionStateStorage.size} active sessions" }
 
         logger.info { "OccupancyChecker - Sessions occupancy check process has ended" }
     }

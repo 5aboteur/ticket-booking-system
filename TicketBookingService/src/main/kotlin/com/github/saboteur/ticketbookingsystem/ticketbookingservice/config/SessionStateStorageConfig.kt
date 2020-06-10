@@ -47,9 +47,7 @@ class SessionStateStorageConfig(
             rs?.close()
         }
 
-        return (storage).also {
-            logger.info { "The system has ${storage.size} active sessions" }
-        }
+        return storage
     }
 
     companion object {
