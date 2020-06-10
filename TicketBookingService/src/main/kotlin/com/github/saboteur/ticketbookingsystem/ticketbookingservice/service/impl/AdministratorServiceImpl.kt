@@ -11,23 +11,26 @@ import com.github.saboteur.ticketbookingsystem.ticketbookingservice.mapper.dto.U
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.mapper.model.SessionInDtoToSessionMapper
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.mapper.model.UserInDtoToUserMapper
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.model.Administrator
+import com.github.saboteur.ticketbookingsystem.ticketbookingservice.model.SessionState
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.model.User
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.repository.AdministratorRepository
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.repository.SessionRepository
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.repository.UserRepository
-import com.github.saboteur.ticketbookingsystem.ticketbookingservice.service.TicketBookingAdministratorService
+import com.github.saboteur.ticketbookingsystem.ticketbookingservice.service.AdministratorService
 import mu.KotlinLogging
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.util.concurrent.ConcurrentMap
 
 @Service
 class TicketBookingAdministratorServiceImpl(
+    private val sessionStateStorage: ConcurrentMap<Long, SessionState>,
     private val sessionRepository: SessionRepository,
     private val administratorRepository: AdministratorRepository,
     private val userRepository: UserRepository
-) : TicketBookingAdministratorService {
+) : AdministratorService {
 
     @Transactional
     override fun getAllUsers(pageIndex: Int, pageSize: Int): List<UserOutDto> =
@@ -180,6 +183,22 @@ class TicketBookingAdministratorServiceImpl(
             result = sessionRepository
                 .save(SessionInDtoToSessionMapper[sessionInDto])
                 .id
+
+            // Put the session initial state into the temporary states storage
+            sessionStateStorage[result] =
+                SessionState(
+                    isOpenForEveryone = false,
+                    createdDate = StringToLocalDateTimeMapper[sessionInDto.createdDate],
+                    beginDate = StringToLocalDateTimeMapper[sessionInDto.beginDate]
+                )
+            logger.info { "Current session state storage: $sessionStateStorage" }
+
+            // Create new thread to ...
+
+//            Thread(
+//                OccupancyChecker(appProperties.occupancyTimeout.toLong(), result)
+//            ).start()
+
             logger.info { "Session with ID = $result created" }
         } catch (e: Exception) {
             logger.error { "Error creating session: ${e.localizedMessage}" }
@@ -213,13 +232,18 @@ class TicketBookingAdministratorServiceImpl(
                         endDate = StringToLocalDateTimeMapper[rescheduleSessionDto.endDate]
                     }
 
-                    updatedSession.id = session.id
+//                    updatedSession.id = session.id
 
                     val updatedId = sessionRepository
                         .save(updatedSession)
                         .id
 
                     if (updatedId == sessionId) {
+                        // Update begin date of the session in the temporary states storage
+                        sessionStateStorage[updatedId]?.beginDate =
+                            StringToLocalDateTimeMapper[rescheduleSessionDto.beginDate]
+                        logger.info { "Current session state storage: $sessionStateStorage" }
+
                         logger.info { "Session with ID = $sessionId updated" }
                         true
                     } else {
@@ -245,6 +269,11 @@ class TicketBookingAdministratorServiceImpl(
             .findByIdOrNull(sessionId)
             ?.let {
                 sessionRepository.deleteById(sessionId)
+
+                // Remove session from the temporary states storage
+                sessionStateStorage.remove(sessionId)
+                logger.info { "Current session state storage: $sessionStateStorage" }
+
                 logger.info { "Session with ID = $sessionId deleted" }
                 true
             }

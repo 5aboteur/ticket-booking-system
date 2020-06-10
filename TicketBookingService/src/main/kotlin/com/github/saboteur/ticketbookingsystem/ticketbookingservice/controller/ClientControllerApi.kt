@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController
 @Api(value = "Ticket Booking Client Controller API", description = "Service controller for clients")
 @RestController
 @RequestMapping(value = ["api"])
-interface TicketBookingClientControllerApi {
+interface ClientControllerApi {
 
     /* * * Client APIs * * */
 

@@ -15,6 +15,9 @@ data class Session(
     @OneToOne(cascade = [CascadeType.ALL])
     val movie: Movie = Movie.empty,
 
+    @Column(name = "created_date")
+    var createdDate: LocalDateTime = LocalDateTime.MIN,
+
     @Column(name = "begin_date")
     var beginDate: LocalDateTime = LocalDateTime.MIN,
 
@@ -28,6 +31,7 @@ data class Session(
     companion object {
         val empty = Session(
             movie = Movie.empty,
+            createdDate = LocalDateTime.MIN,
             beginDate = LocalDateTime.MIN,
             endDate = LocalDateTime.MAX,
             tickets = emptyList()

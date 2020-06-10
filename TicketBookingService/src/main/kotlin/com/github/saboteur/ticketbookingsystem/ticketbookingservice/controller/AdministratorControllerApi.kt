@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController
 @Api(value = "Ticket Booking Administrator Controller API", description = "Service controller for administrators")
 @RestController
 @RequestMapping(value = ["api"])
-interface TicketBookingAdministratorControllerApi {
+interface AdministratorControllerApi {
 
     /* * * Administrator APIs * * */
 

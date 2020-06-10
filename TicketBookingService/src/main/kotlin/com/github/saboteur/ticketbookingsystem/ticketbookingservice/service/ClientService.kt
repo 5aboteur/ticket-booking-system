@@ -5,7 +5,7 @@ import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.SeatDto
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.SessionOutDto
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.TicketDto
 
-interface TicketBookingClientService {
+interface ClientService {
 
     fun getAllSessions(pageIndex: Int, pageSize: Int): List<SessionOutDto>
     fun getActiveSessions(pageIndex: Int, pageSize: Int): List<SessionOutDto>

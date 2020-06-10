@@ -16,10 +16,7 @@ data class BookingResultDto(
     val ticket: TicketDto?,
 
     @ApiModelProperty(value = "operation")
-    val operation: String,
-
-    @ApiModelProperty(value = "resultMsg")
-    val resultMsg: String
+    val operation: String
 
 ) {
     companion object {
@@ -27,8 +24,7 @@ data class BookingResultDto(
             clientId = -1L,
             sessionId = -1L,
             ticket = null,
-            operation = "",
-            resultMsg = ""
+            operation = ""
         )
     }
 }

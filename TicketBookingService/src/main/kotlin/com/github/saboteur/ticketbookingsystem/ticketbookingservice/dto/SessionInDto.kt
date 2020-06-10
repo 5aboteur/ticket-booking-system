@@ -9,6 +9,9 @@ data class SessionInDto(
     @ApiModelProperty(value = "movie")
     val movie: MovieDto,
 
+    @ApiModelProperty(value = "createdDate")
+    val createdDate: String,
+
     @ApiModelProperty(value = "beginDate")
     val beginDate: String,
 
@@ -22,6 +25,7 @@ data class SessionInDto(
     companion object {
         val empty = SessionInDto(
             movie = MovieDto.empty,
+            createdDate = "",
             beginDate = "",
             endDate = "",
             tickets = emptyList()

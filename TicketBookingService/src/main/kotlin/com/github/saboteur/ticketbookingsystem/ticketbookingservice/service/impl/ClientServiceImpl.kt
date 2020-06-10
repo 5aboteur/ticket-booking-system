@@ -11,23 +11,26 @@ import com.github.saboteur.ticketbookingsystem.ticketbookingservice.mapper.dto.B
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.mapper.dto.SessionToSessionOutDtoMapper
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.mapper.dto.TicketToSeatDtoMapper
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.mapper.dto.TicketToTicketDtoMapper
+import com.github.saboteur.ticketbookingsystem.ticketbookingservice.model.SessionState
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.model.booking.BookedTicket
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.model.booking.BookingResult
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.repository.ClientRepository
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.repository.SessionRepository
-import com.github.saboteur.ticketbookingsystem.ticketbookingservice.service.TicketBookingClientService
+import com.github.saboteur.ticketbookingsystem.ticketbookingservice.service.ClientService
 import mu.KotlinLogging
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.util.concurrent.ConcurrentMap
 
 @Service
-class TicketBookingClientServiceImpl(
+class ClientServiceImpl(
     private val appProperties: AppProperties,
+    private val sessionStateStorage: ConcurrentMap<Long, SessionState>,
     private val sessionRepository: SessionRepository,
     private val clientRepository: ClientRepository
-) : TicketBookingClientService {
+) : ClientService {
 
     @Transactional
     override fun getAllSessions(pageIndex: Int, pageSize: Int): List<SessionOutDto> =
@@ -61,6 +64,33 @@ class TicketBookingClientServiceImpl(
             this.resultMsg = "failed"
         }
 
+        // Get the user's client profile
+        val client = clientRepository
+            .findByIdOrNull(clientId)
+            ?: return BookingResultToBookingResultDtoMapper[bookingResult].also {
+                logger.error {
+                    "Error booking ticket: a client with ID = $clientId doesn't exist in the database"
+                }
+            }
+
+        // If the user has the standard category and the booking doesn't open for everyone yet - reject it
+        if (client.category == Category.STANDARD.ordinal) {
+            val s = sessionStateStorage[sessionId]
+                ?: return BookingResultToBookingResultDtoMapper[bookingResult].also {
+                    logger.error {
+                        "Error booking ticket: a session with ID = $sessionId doesn't exist in the session state storage"
+                    }
+                }
+
+            if (!s.isOpenForEveryone) {
+                return BookingResultToBookingResultDtoMapper[bookingResult].also {
+                    logger.error {
+                        "Error booking ticket: a session with ID = $sessionId doesn't open for everyone yet"
+                    }
+                }
+            }
+        }
+
         // Check if a session with the provided ID actually exists
         val session = sessionRepository
             .findByIdOrNull(sessionId)
@@ -89,15 +119,6 @@ class TicketBookingClientServiceImpl(
                 }
             }
         }
-
-        // Get user's client profile
-        val client = clientRepository
-            .findByIdOrNull(clientId)
-            ?: return BookingResultToBookingResultDtoMapper[bookingResult].also {
-                logger.error {
-                    "Error booking ticket: a client with ID = $clientId doesn't exist in the database"
-                }
-            }
 
         // Check if a ticket with the seat number we got already booked
         when (session.tickets[index].isBooked) {
@@ -186,7 +207,7 @@ class TicketBookingClientServiceImpl(
             }
         }
 
-        // Get user's client profile
+        // Get the user's client profile
         val client = clientRepository
             .findByIdOrNull(clientId)
             ?: return BookingResultToBookingResultDtoMapper[bookingResult].also {

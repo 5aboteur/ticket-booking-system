@@ -11,8 +11,7 @@ object BookingResultToBookingResultDtoMapper : Mapper<BookingResult, BookingResu
             clientId = from.clientId,
             sessionId = from.sessionId,
             ticket = from.bookedTicket?.let { BookedTicketToTicketDtoMapper[it] },
-            operation = from.operation.operationName,
-            resultMsg = from.resultMsg
+            operation = from.operation.operationName
         )
 
 }

@@ -6,6 +6,5 @@ class BookingResult {
     var clientId: Long = -1L
     var sessionId: Long = -1L
     var bookedTicket: BookedTicket? = null
-    var operation: BookingOperation = BookingOperation.UNKNOWN
-    var resultMsg: String = ""
+    var operation: BookingOperation = BookingOperation.FAILED
 }

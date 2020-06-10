@@ -10,6 +10,7 @@ object SessionInDtoToSessionMapper : Mapper<SessionInDto, Session> {
     override fun get(from: SessionInDto): Session =
         Session(
             movie = MovieDtoToMovieMapper[from.movie],
+            createdDate = StringToLocalDateTimeMapper[from.createdDate],
             beginDate = StringToLocalDateTimeMapper[from.beginDate],
             endDate = StringToLocalDateTimeMapper[from.endDate],
             tickets = from.tickets.map(TicketDtoToTicketMapper::get)

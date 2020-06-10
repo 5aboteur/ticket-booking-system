@@ -6,7 +6,7 @@ import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.SessionO
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.UserInDto
 import com.github.saboteur.ticketbookingsystem.ticketbookingservice.dto.UserOutDto
 
-interface TicketBookingAdministratorService {
+interface AdministratorService {
 
     fun getAllUsers(pageIndex: Int, pageSize: Int): List<UserOutDto>
 
