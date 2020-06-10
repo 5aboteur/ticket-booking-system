@@ -25,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.concurrent.ConcurrentMap
 
 @Service
-class TicketBookingAdministratorServiceImpl(
+class AdministratorServiceImpl(
     private val sessionStateStorage: ConcurrentMap<Long, SessionState>,
     private val sessionRepository: SessionRepository,
     private val administratorRepository: AdministratorRepository,
@@ -192,12 +192,6 @@ class TicketBookingAdministratorServiceImpl(
                     beginDate = StringToLocalDateTimeMapper[sessionInDto.beginDate]
                 )
             logger.info { "Current session state storage: $sessionStateStorage" }
-
-            // Create new thread to ...
-
-//            Thread(
-//                OccupancyChecker(appProperties.occupancyTimeout.toLong(), result)
-//            ).start()
 
             logger.info { "Session with ID = $result created" }
         } catch (e: Exception) {

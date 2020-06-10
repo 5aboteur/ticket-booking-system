@@ -12,11 +12,12 @@ spring:
       schema: ${app.postgres.schema}
 
 app:
-  service-name: ${SERVICE_NAME:ticket-booking-service}
   social-benefits: ${SOCIAL_BENEFITS_ENABLE:true}
-  occupancy-timeout: ${OCCUPANCY_TIMEOUT_SECONDS:10}
+  standard-category-booking-timeout: ${STANDARD_CATEGORY_BOOKING_TIMEOUT:2}
+  occupancy-timeout: ${OCCUPANCY_TIMEOUT:1}
   occupancy-min-rate: ${OCCUPANCY_MIN_RATE:2}
   occupancy-max-rate: ${OCCUPANCY_MAX_RATE:5}
+  occupancy-checker-cron: "0 * * ? * *" # every minute
   social-one-discount-percentage: ${SOCIAL_ONE_DISCOUNT_PERCENTAGE:1}
   social-two-discount-percentage: ${SOCIAL_TWO_DISCOUNT_PERCENTAGE:2}
   social-three-discount-percentage: ${SOCIAL_THREE_DISCOUNT_PERCENTAGE:3}

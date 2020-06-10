@@ -60,8 +60,6 @@ class ClientServiceImpl(
         val bookingResult = BookingResult().apply {
             this.clientId = clientId
             this.sessionId = sessionId
-            this.operation = BookingOperation.CREATE
-            this.resultMsg = "failed"
         }
 
         // Get the user's client profile
@@ -78,14 +76,16 @@ class ClientServiceImpl(
             val s = sessionStateStorage[sessionId]
                 ?: return BookingResultToBookingResultDtoMapper[bookingResult].also {
                     logger.error {
-                        "Error booking ticket: a session with ID = $sessionId doesn't exist in the session state storage"
+                        "Error booking ticket: a session with ID = $sessionId " +
+                            "doesn't exist in the session state storage"
                     }
                 }
 
             if (!s.isOpenForEveryone) {
+                bookingResult.operation = BookingOperation.REJECTED
                 return BookingResultToBookingResultDtoMapper[bookingResult].also {
-                    logger.error {
-                        "Error booking ticket: a session with ID = $sessionId doesn't open for everyone yet"
+                    logger.info {
+                        "Booking rejected: a session with ID = $sessionId doesn't open for everyone yet"
                     }
                 }
             }
@@ -147,7 +147,7 @@ class ClientServiceImpl(
                         .apply {
                             bookedTicket?.price = session.tickets[index].price
                             bookedTicket?.discountPrice = session.tickets[index].discountPrice
-                            resultMsg = "succeed"
+                            operation = BookingOperation.CREATED
                         }
                         .also {
                             logger.info { "Client = $clientId successfully booked a ticket" }
@@ -174,8 +174,6 @@ class ClientServiceImpl(
         val bookingResult = BookingResult().apply {
             this.clientId = clientId
             this.sessionId = sessionId
-            this.operation = BookingOperation.CANCEL
-            this.resultMsg = "failed"
         }
 
         // Check if a session with the provided ID actually exists
@@ -239,7 +237,7 @@ class ClientServiceImpl(
                         .apply {
                             bookedTicket?.price = session.tickets[index].price
                             bookedTicket?.discountPrice = session.tickets[index].discountPrice
-                            resultMsg = "succeed"
+                            operation = BookingOperation.CANCELED
                         }
                         .also {
                             logger.info { "Client = $clientId successfully cancel the booking" }
